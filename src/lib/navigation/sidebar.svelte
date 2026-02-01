@@ -40,68 +40,68 @@
     });
     
 </script>
-    <div class="sidebar" class:collapsed={$sidebar_collapsed}>
-        <div class="menu-links">
-            <div class="section">
-                <button class:active={page.url.pathname === "/main/home"}  onclick={() => goto("/main/home")}>
-                    <div class="icon-container">
-                        <Icon mode={folder} name="home" width={20} height={30} alt="home" />
-                    </div>
-                    <span class:label-hidden={$sidebar_collapsed}>
-                        Home Page
-                    </span>
-                </button>
-                <button class:active={page.url.pathname === `/main/user/${page.data.user?.username}`} onclick={goto_account}>
-                    <div class="icon-container">
-                        <Icon mode={folder} name="account" width={20} height={30} alt="account"/>
-                    </div>
-                    <span class:label-hidden={$sidebar_collapsed}>My Account</span>
-                </button>
-            </div>
-            <div class="section">
-                <h4 class:label-hidden={$sidebar_collapsed}>Topics</h4>
-                <button class:active={page.url.pathname === "/main/forum_posts/Art"} onclick={() => goto('/main/forum_posts/Art')}>
-                    <div class="icon-container">
-                        <Icon mode={folder} name="art" width={20} height={30} alt="art"/>
-                    </div>
-                    <span class:label-hidden={$sidebar_collapsed}>Art</span>
-                </button>
-                <button class:active={page.url.pathname === "/main/forum_posts/Philosophy"} onclick={() => goto('/main/forum_posts/Philosophy')}>
-                    <div class="icon-container">
-                        <Icon mode={folder} name="philosophy" width={20} height={30} alt="philosophy"/>
-                    </div>
-                    <span class:label-hidden={$sidebar_collapsed}>Philosophy</span>
-                </button>
-                <button class:active={page.url.pathname === "/main/forum_posts/Nature"} onclick={() => goto('/main/forum_posts/Nature')}>
-                    <div class="icon-container">
-                        <Icon mode={folder} name="nature" width={20} height={30} alt="nature"/>
-                    </div>
-                    <span class:label-hidden={$sidebar_collapsed}>Nature</span>
-                </button>
-                <button class:active={page.url.pathname === "/main/forum_posts/Science"} onclick={() => goto('/main/forum_posts/Science')}>
-                    <div class="icon-container">
-                        <Icon mode={folder} name="science" width={20} height={30} alt="science"/>
-                    </div>
-                    <span class:label-hidden={$sidebar_collapsed}>Science</span>
-                </button>
-            </div>
-            <div class="section">
-                <h4 class:label-hidden={$sidebar_collapsed}>More</h4>
-                <button class:active={page.url.pathname === "/main/rules"} onclick={() => goto('/main/rules')}>
-                    <div class="icon-container">
-                        <Icon mode={folder} name="rules" width={20} height={30} alt="rules"/>
-                    </div>
-                    <span class:label-hidden={$sidebar_collapsed}>Rules</span>
-                </button>
-                <button class:active={page.url.pathname === "/main/ranks"} onclick={() => goto('/main/ranks')}>
-                    <div class="icon-container">
-                        <Icon mode={folder} name="verified" width={20} height={30} alt="verified"/>
-                    </div>
-                    <span class:label-hidden={$sidebar_collapsed}>Ranks</span>
-                </button>
-            </div>
+<div class="sidebar" class:collapsed={$sidebar_collapsed}>
+    <div class="menu-links">
+        <div class="section">
+            <button class:active={page.url.pathname === "/main/home"}  onclick={() => goto("/main/home")}>
+                <div class="icon-container">
+                    <Icon mode={folder} name="home" width={20} height={30} alt="home" />
+                </div>
+                <span class:label-hidden={$sidebar_collapsed}>
+                    Home Page
+                </span>
+            </button>
+            <button class:active={page.url.pathname === `/main/user/${page.data.user?.username}`} onclick={goto_account}>
+                <div class="icon-container">
+                    <Icon mode={folder} name="account" width={20} height={30} alt="account"/>
+                </div>
+                <span class:label-hidden={$sidebar_collapsed}>My Account</span>
+            </button>
+        </div>
+        <div class="section">
+            <h4 class:label-hidden={$sidebar_collapsed}>Topics</h4>
+            <button class:active={page.url.pathname === "/main/forum_posts/Art"} onclick={() => goto('/main/forum_posts/Art')}>
+                <div class="icon-container">
+                    <Icon mode={folder} name="art" width={20} height={30} alt="art"/>
+                </div>
+                <span class:label-hidden={$sidebar_collapsed}>Art</span>
+            </button>
+            <button class:active={page.url.pathname === "/main/forum_posts/Philosophy"} onclick={() => goto('/main/forum_posts/Philosophy')}>
+                <div class="icon-container">
+                    <Icon mode={folder} name="philosophy" width={20} height={30} alt="philosophy"/>
+                </div>
+                <span class:label-hidden={$sidebar_collapsed}>Philosophy</span>
+            </button>
+            <button class:active={page.url.pathname === "/main/forum_posts/Nature"} onclick={() => goto('/main/forum_posts/Nature')}>
+                <div class="icon-container">
+                    <Icon mode={folder} name="nature" width={20} height={30} alt="nature"/>
+                </div>
+                <span class:label-hidden={$sidebar_collapsed}>Nature</span>
+            </button>
+            <button class:active={page.url.pathname === "/main/forum_posts/Science"} onclick={() => goto('/main/forum_posts/Science')}>
+                <div class="icon-container">
+                    <Icon mode={folder} name="science" width={20} height={30} alt="science"/>
+                </div>
+                <span class:label-hidden={$sidebar_collapsed}>Science</span>
+            </button>
+        </div>
+        <div class="section">
+            <h4 class:label-hidden={$sidebar_collapsed}>More</h4>
+            <button class:active={page.url.pathname === "/main/rules"} onclick={() => goto('/main/rules')}>
+                <div class="icon-container">
+                    <Icon mode={folder} name="rules" width={20} height={30} alt="rules"/>
+                </div>
+                <span class:label-hidden={$sidebar_collapsed}>Rules</span>
+            </button>
+            <button class:active={page.url.pathname === "/main/ranks"} onclick={() => goto('/main/ranks')}>
+                <div class="icon-container">
+                    <Icon mode={folder} name="verified" width={20} height={30} alt="verified"/>
+                </div>
+                <span class:label-hidden={$sidebar_collapsed}>Ranks</span>
+            </button>
         </div>
     </div>
+</div>
 
 <style>
     .sidebar {

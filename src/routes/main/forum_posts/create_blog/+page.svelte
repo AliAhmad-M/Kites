@@ -339,7 +339,7 @@
         box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.1);
     }
 
-        .image-upload-container {
+    .image-upload-container {
         width: 100%;
     }
 
@@ -541,8 +541,7 @@
             padding: 1.5rem;
             margin: 2rem 1rem;
 
-            width: 64vw;
-            max-width: 540px;
+            width: 80vw;
 
             gap: 1.5rem;
         }

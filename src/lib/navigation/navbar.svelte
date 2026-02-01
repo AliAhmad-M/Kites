@@ -201,4 +201,40 @@
         margin-right: 0.5rem;
     }
 
+    @media screen and (max-width: 480px) {
+        .navbar-links {
+            margin-top: 0.8rem;
+            align-items: center;
+        }
+
+        .login-button {
+            margin-bottom: 0.2rem;
+        }
+
+        .pfp {
+            margin-top: 0.2rem;
+        }
+
+        /* Hide all nav items */
+        .navbar-links li {
+            display: none;
+        }
+
+        /* Show only change theme */
+        .navbar-links li:nth-child(3) {
+            display: flex;
+            align-items: center;
+            margin-top: 0;
+        }
+
+        .navbar-links li:nth-child(3) button {
+            width: 2.5rem;
+            height: 2.5rem;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 0;
+        }
+    }
 </style>

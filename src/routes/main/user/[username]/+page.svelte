@@ -249,7 +249,6 @@
         
         width: 100%;
         max-width: 640px;
-        min-width: 360px;
         box-sizing: border-box;
         
         padding: 2rem;
@@ -582,7 +581,7 @@
         display: none;
     }
 
-    @media (max-width: 500px) {
+    @media (max-width: 480px) {
         .details {
             flex-direction: column;
             gap: 0.5rem;
@@ -599,8 +598,8 @@
 
         .more-options {
             position: relative;
-            top: -175px;
-            left: 140px;
+            top: -160px;
+            left: 120px;
         }
 
         .dropdown-menu {

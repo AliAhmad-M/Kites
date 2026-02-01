@@ -50,7 +50,6 @@
         margin: 1rem 4rem 1rem 6rem;
 
         width: 45vw;
-        min-width: 400px;
         max-width: 900px;
     }
     
@@ -99,10 +98,17 @@
         border: 1px solid var(--color-text-primary);
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 1200px) {
         .post {
             width: 64vw;
-            min-width: 500px;
+        }
+    }
+
+    @media (max-width:  768px) {
+        .post {
+            width: 80vw;
+            margin-left: auto;
+            margin-right: auto;
         }
     }
     
