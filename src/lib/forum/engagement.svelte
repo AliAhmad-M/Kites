@@ -175,7 +175,10 @@
     >
         <div class="modal-content" transition:scale={{ start: 0.95, duration: 200 }}>
             <div class="modal-header">
-                <h2>Add Comment</h2>
+                <div class="modal-heading">
+                    <span class="modal-eyebrow">{topic}</span>
+                    <h2>Add a comment</h2>
+                </div>
                 <button class="close-button" onclick={toggle_modal} aria-label="Close modal">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -186,16 +189,20 @@
             
             <div class="modal-body">
                 <div class="form-group">
-                    <textarea id="comment" bind:value={comment_text} rows="5" placeholder="Write your comment here..."required>
+                    <label class="field-label" for="comment">Your comment</label>
+                    <textarea id="comment" bind:value={comment_text} rows="5" placeholder="Share your thoughts..." required>
                     </textarea>
                 </div>
                 
                 <div class="form-actions">
+                    <button type="button" class="cancel" onclick={toggle_modal} disabled={is_submitting}>
+                        Cancel
+                    </button>
                     <button 
-                        type="button" class="confirm" onclick={submit_comment} 
+                        type="button" class="confirm" onclick={submit_comment}
                         disabled={!comment_text.trim() || is_submitting}
                     >
-                        {is_submitting ? 'Posting...' : 'Post'}
+                        {is_submitting ? 'Posting...' : 'Post comment'}
                     </button>
                 </div>
             </div>
@@ -265,6 +272,7 @@
         height: 100%;
         
         background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
         
         display: flex;
         align-items: center;
@@ -274,13 +282,13 @@
     }
     
     .modal-content {
-        background-color: var(--color-background-secondary);
-        border-radius: 0.75rem;
+        background-color: var(--color-background-primary);
+        border: 1px solid var(--color-navigation-border);
+        border-radius: 12px;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
         
-        width: 90%;
-        
-        max-width: 500px;
-        max-height: 90vh;
+        width: min(92vw, 540px);
+        max-height: min(90vh, 680px);
         
         overflow-y: auto;
     }
@@ -289,13 +297,31 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        
-        padding: 1rem;
+        gap: 1rem;
+        padding: 1.25rem 1.5rem;
+        background-color: var(--color-background-secondary);
+        border-bottom: 1px solid var(--color-navigation-border);
     }
     
+    .modal-heading {
+        min-width: 0;
+    }
+
     .modal-header h2 {
         margin: 0;
-        font-size: 1.25rem;
+        color: var(--color-text-primary);
+        font-size: 1.2rem;
+        line-height: 1.35;
+    }
+
+    .modal-eyebrow {
+        display: block;
+        margin-bottom: 0.25rem;
+        color: var(--color-blue-secondary);
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
     }
     
     .close-button {
@@ -303,7 +329,7 @@
         border: none;
         
         cursor: pointer;
-        color: var(--color-text-primary);
+        color: var(--color-text-secondary);
         
         padding: 0.25rem;
         border-radius: 0.25rem;
@@ -316,7 +342,7 @@
     }
     
     .modal-body {
-        padding: 1rem;
+        padding: 1.5rem;
     }
     
     .form-group {
@@ -325,17 +351,17 @@
     
     .form-group textarea {
         width: 100%;
-        padding: 0.75rem 1rem;
-        border-radius: 0.75rem;
-        border: none;
+        padding: 0.9rem 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--color-navigation-border);
         
-        color: var(--color-text-secondary);
+        color: var(--color-text-primary);
         background-color: var(--color-background-primary);
 
         font-family: inherit;
         font-size: 1rem;
 
-        transition: all 0.2s ease;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
         box-sizing: border-box;
         min-height: 9rem;
         resize: vertical;
@@ -345,7 +371,16 @@
 
     .form-group textarea:focus {
         outline: none;
-        box-shadow: 0 0 0 2px var(--color-blue-secondary);
+        border-color: var(--color-blue-secondary);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-blue-secondary) 18%, transparent);
+    }
+
+    .field-label {
+        display: block;
+        margin-bottom: 0.45rem;
+        color: var(--color-text-primary);
+        font-size: 0.82rem;
+        font-weight: 600;
     }
     
     .form-actions {
@@ -353,23 +388,26 @@
         
         justify-content: flex-end;
         gap: 0.75rem;
-        
-        margin-top: 1.5rem;
-        margin-bottom: 1rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--color-navigation-border);
     }
     
+    button.confirm,
+    button.cancel {
+        min-height: 42px;
+        padding: 0.65rem 1rem;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+    }
+
     button.confirm {
         background-color: var(--color-blue-primary);
         color: white;
-
         border: none;
-        border-radius: 1rem;
-
-        padding: 0.5rem 2rem;
-        font-weight: 600;
-
-        cursor: pointer;
-        transition: all 0.2s ease;
     }
     
     button.confirm:hover {
@@ -381,6 +419,21 @@
         cursor: not-allowed;
     }
 
+    button.cancel {
+        background: transparent;
+        color: var(--color-text-primary);
+        border: 1px solid var(--color-navigation-border);
+    }
+
+    button.cancel:hover:not(:disabled) {
+        border-color: var(--color-blue-secondary);
+    }
+
+    button.cancel:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
     @media (max-width: 480px) {
         .engagement-btn {
             padding: 0.55rem 0.65rem;
@@ -388,6 +441,12 @@
 
         .modal-content {
             width: calc(100% - 2rem);
+            max-height: calc(100dvh - 2rem);
+        }
+
+        .modal-header,
+        .modal-body {
+            padding: 1rem;
         }
     }
 </style>

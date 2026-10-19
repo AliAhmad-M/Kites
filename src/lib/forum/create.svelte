@@ -186,39 +186,43 @@
         >
             <div class="modal-content" transition:scale={{ start: 0.95, duration: 200 }}>
                 <div class="modal-header">
+                    <div class="modal-heading">
+                        <h2>Create a discussion post</h2>
+                    </div>
                     <button class="close-button" onclick={toggle_modal} aria-label="Close modal">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
                             <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
                     </button>
-                    <h2>Create a post</h2>
                 </div>
                 
                 <div class="modal-body">
                     <div class="form-group">
+                        <label class="field-label" for="heading">Title</label>
                         <input 
                             type="text" 
                             id="heading" 
                             name="heading" 
                             bind:value={heading_text} 
-                            placeholder="Add a title..."
+                            placeholder="Give your discussion a clear title"
                             required
                         >
                         {#if heading_too_large}
                             <div class="error-message">
-                                Title too long ({character_count_heading}/70 characters)
+                                Title too long ({character_count_heading}/64 characters)
                             </div>
                         {/if}
                     </div>
 
                     <div class="form-group">
+                        <label class="field-label" for="content">Your post</label>
                         <textarea 
                             id="content" 
                             name="content" 
                             rows="4" 
                             bind:value={content_text} 
-                            placeholder="Add a description..."
+                            placeholder="What would you like to discuss?"
                             required
                         ></textarea>
                         <div class="character-count-container">
@@ -232,6 +236,7 @@
                     </div>
 
                     <div class="form-group">
+                        <label class="field-label" for="topic">Topic</label>
                         <select id="topic" name="topic" bind:value={topic_chosen} required>
                             <option value="" disabled selected>Select a topic</option>
                             <option value="Art">Art</option>
@@ -245,14 +250,12 @@
                         <div class="divider">
                             <span>or</span>
                         </div>
-                        <a href="/main/posts/create_blog" class="create-blog-link">
+                        <a href="/main/posts/create_blog" class="create-blog-link" onclick={() => show_modal = false}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                             </svg>
-                            <button onclick={() => show_modal = false}> 
-                                Create a blog post instead
-                            </button>
+                            <span>Create a blog post instead</span>
                         </a>
                     </div>
 
@@ -344,33 +347,39 @@
     }
     
     .modal-content {
-        background-color: var(--color-background-secondary);
-        border-radius: 16px;
+        background-color: var(--color-background-primary);
+        border: 1px solid var(--color-navigation-border);
+        border-radius: 12px;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
         
-        width: 90%;
-        max-width: 500px;
-        max-height: 90vh;
+        width: min(92vw, 560px);
+        max-height: min(90vh, 760px);
         
         overflow: hidden;
     }
     
     .modal-header {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-start;
+        gap: 1rem;
         
         align-items: center;
-        padding: 1rem 1.25rem;
+        padding: 1.25rem 1.5rem;
 
         background-color: var(--color-background-secondary);
+        border-bottom: 1px solid var(--color-navigation-border);
     }
     
-    .modal-header h2 {
-        margin: 0;
-        margin-right: 1rem;
-
-        color: var(--color-text-primary);
+    .modal-heading {
         flex: 1;
-        text-align: center;
+        min-width: 0;
+    }
+
+    .modal-heading h2 {
+        margin: 0;
+        font-size: 1.2rem;
+        line-height: 1.35;
+        color: var(--color-text-primary);
     }
     
     .close-button {
@@ -378,7 +387,7 @@
         border: none;
         cursor: pointer;
         
-        color: #999;
+        color: var(--color-text-secondary);
         
         padding: 0.5rem;
         border-radius: 0.5rem;
@@ -418,9 +427,9 @@
     }
     
     .modal-body {
-        padding: 1.25rem;
+        padding: 1.5rem;
         overflow-y: auto;
-        max-height: calc(90vh - 80px);
+        max-height: calc(90vh - 90px);
     }
     
     .form-group {
@@ -432,30 +441,40 @@
     .form-group select {
         width: 100%;
         padding: 0.75rem 1rem;
-        border-radius: 0.75rem;
-        border: none;
+        border-radius: 8px;
+        border: 1px solid var(--color-navigation-border);
         
-        color: var(--color-text-secondary);
+        color: var(--color-text-primary);
         background-color: var(--color-background-primary);
 
         font-family: inherit;
         font-size: 1rem;
 
-        transition: all 0.2s ease;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
         box-sizing: border-box;
         resize: none;
     }
     
     .form-group input::placeholder,
     .form-group textarea::placeholder {
-        color: var(--color-navigation-border);
+        color: var(--color-text-secondary);
+        opacity: 0.75;
     }
     
     .form-group input:focus,
     .form-group textarea:focus,
     .form-group select:focus {
         outline: none;
-        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        border-color: var(--color-blue-secondary);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-blue-secondary) 18%, transparent);
+    }
+
+    .field-label {
+        display: block;
+        margin-bottom: 0.45rem;
+        color: var(--color-text-primary);
+        font-size: 0.82rem;
+        font-weight: 600;
     }
     
     .form-group select {
@@ -474,7 +493,7 @@
     }
 
     .blog-link-container {
-        margin: 2rem 0;
+        margin: 1.4rem 0 1rem;
         text-align: center;
     }
 
@@ -497,19 +516,20 @@
         font-size: 0.9rem;
     }
     
-    .create-blog-link, .create-blog-link button {
+    .create-blog-link {
         text-decoration: none;
 
         color: var(--color-blue-primary);
         border-color: transparent;
         background-color: transparent;
 
-        font-size: 1rem;
+        font-size: 0.9rem;
+        font-weight: 600;
          
         transition: color 0.2s ease;
     }
 
-    .create-blog-link:hover, .create-blog-link button:hover {
+    .create-blog-link:hover {
         color: var(--color-blue-secondary);
     }
     
@@ -517,7 +537,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-top: 1rem;
+        margin-top: 0.75rem;
         padding-top: 1rem;
         border-top: 1px solid var(--color-navigation-border);
     }
@@ -532,15 +552,15 @@
         cursor: pointer;
         color: var(--color-blue-primary);
         
-        padding: 0;
-        margin: 0.5rem;
-        
-        transform: scale(1.1);
+        padding: 0.55rem 0.75rem;
+        margin: 0;
 
         transition: all 0.2s ease;
         display: flex;
         align-items: center;
         justify-content: center;
+        gap: 0.5rem;
+        border-radius: 8px;
     }
     
     .media-button:hover:not(:disabled) {
@@ -548,14 +568,9 @@
     }
 
     .media-options span {
-        margin-left: 0.5rem;
-    }
-
-    span {
         font-size: 0.75rem;
         color: var(--color-text-secondary);
-
-        font-weight: bold;
+        font-weight: 600;
     }
 
     .media-button:disabled {
@@ -572,6 +587,7 @@
     .character-count {
         font-size: 0.75rem;
         color: var(--color-text-secondary);
+        font-weight: 500;
     }
     
     .over-limit {
@@ -607,6 +623,7 @@
     .image-preview {
         width: 5rem;
         height: 4rem;
+        padding-bottom: 1rem;
         flex: 0 0 auto;
         object-fit: cover;
         border-radius: 0.4rem;
@@ -655,14 +672,17 @@
 
     @media (max-width: 640px) {
         .modal-content {
-            width: 95%;
-            margin: 0.7rem;
+            width: calc(100% - 1.25rem);
+            margin: 0.625rem;
         }
 
         .bottom-section {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .modal-header,
+        .modal-body {
+            padding: 1rem;
         }
     }
 </style>
