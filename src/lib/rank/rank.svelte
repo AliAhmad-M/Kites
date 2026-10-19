@@ -12,7 +12,7 @@
             discussion: 750,
             blog: 3500
         },
-        'Golden': {
+            'Golden': {
             discussion: 1000,
             blog: 5000
         }

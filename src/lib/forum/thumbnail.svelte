@@ -1,12 +1,13 @@
 <script>
 	import { goto } from "$app/navigation";
-    import { Engagement, lazyImage } from "$lib";
+    import { Engagement, Icon, lazyImage, Tooltip } from "$lib";
 
     const { 
         post_id, 
         user_liked, 
         pfp, 
         username, 
+        author_rank = 'default',
         topic, 
         heading, 
         image, 
@@ -27,6 +28,11 @@
         </button>
         {/if}
         <span class="username">{username}</span>
+        {#if author_rank && author_rank !== 'default'}
+            <Tooltip text={author_rank}>
+                <Icon mode={undefined} name={author_rank} width={20} height={20} alt={author_rank} />
+            </Tooltip>
+        {/if}
         <span class="topic"><strong>{topic} | {type}</strong></span>
     </div>
     <a href='/main/forum_posts/{topic}/{post_id}'>

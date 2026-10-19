@@ -12,6 +12,7 @@
         pfp,
         heading, 
         username, 
+        author_rank,
         content, 
         topic,
         comments, 
@@ -194,6 +195,11 @@
                 {/if}
                 <div class="blog-author-info">
                     <p class="blog-author-name">{username}</p>
+                    {#if author_rank && author_rank !== 'default'}
+                        <Tooltip text={author_rank}>
+                            <Icon mode={undefined} name={author_rank} width={20} height={20} alt={author_rank} />
+                        </Tooltip>
+                    {/if}
                 </div>
             </div>  
             

@@ -119,6 +119,7 @@
                     post_id={post.id} 
                     pfp={post.author_pfp} 
                     username={post.author_name}
+                    author_rank={post.author_rank}
                     topic={post.topic} 
                     heading={post.heading} 
                     user_liked={post.user_liked} 

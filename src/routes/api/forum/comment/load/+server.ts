@@ -25,6 +25,7 @@ export const GET: RequestHandler = async ({ url }) => {
                     select: {
                         id: true,
                         username: true,
+                        rank: true,
                         image: {
                             select: { id: true },
                         },
@@ -41,6 +42,7 @@ export const GET: RequestHandler = async ({ url }) => {
                 : null,
 
             author_name: comment.author?.username,
+            author_rank: comment.author?.rank,
             author: undefined,
         }));
 

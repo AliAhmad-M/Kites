@@ -90,6 +90,11 @@ import { page } from "$app/state";
         <div class="comment-content">
             <div class="comment-header">
                 <span class="comment-author">{comment_data.author_name}</span>
+                {#if comment_data.author_rank && comment_data.author_rank !== 'default'}
+                    <Tooltip text={comment_data.author_rank}>
+                        <Icon mode={undefined} name={comment_data.author_rank} width={20} height={20} alt={comment_data.author_rank} />
+                    </Tooltip>
+                {/if}
                 {#if (page.data.authenticated && comment_data.author_name === page.data.user?.username) || page.data.rank === "Admin"}
                     <div class="comment-options">
                         <Tooltip text="More">

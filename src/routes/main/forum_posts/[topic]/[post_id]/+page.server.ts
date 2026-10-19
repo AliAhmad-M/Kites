@@ -29,6 +29,7 @@ export async function load({ locals, params }) {
                     // Get author profile picture
                     author: {
                         select: {
+                            rank: true,
                             image: {
                                 select: { id: true }
                             }
@@ -46,6 +47,7 @@ export async function load({ locals, params }) {
                         include: {
                             author: {
                                 select: {
+                                    rank: true,
                                     image: {
                                         select: { binary_blob: true, mime_type: true }
                                     }
@@ -63,6 +65,7 @@ export async function load({ locals, params }) {
             // Attatch author pfp url to comment
             const comments_with_pfps = post.forum_comments.map(comment => ({
                 ...comment,
+                author_rank: comment.author?.rank,
                 author_pfp: comment.author?.image 
                     ? `/api/user/image/${encodeURIComponent(comment.author_name)}`
                     : null
@@ -82,6 +85,7 @@ export async function load({ locals, params }) {
                 author_pfp: post.author.image
                     ? `/api/user/image/${encodeURIComponent(post.author_name)}`
                     : null,
+                author_rank: post.author.rank,
                 
                 comments: comments_with_pfps
             }

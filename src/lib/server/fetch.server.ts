@@ -11,6 +11,7 @@ export async function fetch_featured_posts() {
             // Get author profile picture
             author: {
                 select: {
+                    rank: true,
                     image: {
                         select: { id: true }
                     }
@@ -53,6 +54,7 @@ export async function fetch_posts(locals: any, topic: string | undefined, page: 
             // Get author profile picture
             author: {
                 select: {
+                    rank: true,
                     image: {
                         select: { id: true }
                     }
@@ -73,6 +75,7 @@ export async function fetch_posts(locals: any, topic: string | undefined, page: 
             return {
                 ...post,
                 image_url: post.image ? `/api/forum/image/${post.id}` : null,
+                author_rank: post.author.rank,
                 author_pfp: post.author.image
                     ? `/api/user/image/${encodeURIComponent(post.author_name)}`
                     : null,

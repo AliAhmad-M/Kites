@@ -13,6 +13,7 @@
             pfp={post_data.author_pfp ?? ''} 
             heading={post_data.post.heading ?? ''} 
             username={post_data.post.author_name ?? ''} 
+            author_rank={post_data.author_rank}
             content={post_data.post.content ?? ''} 
             topic={post_data.post.topic ?? ''}
             comments={post_data.comments ?? []} 
@@ -27,6 +28,7 @@
             pfp={post_data.author_pfp ?? ''} 
             heading={post_data.post.heading ?? ''} 
             username={post_data.post.author_name ?? ''} 
+            author_rank={post_data.author_rank}
             content={post_data.post.content ?? ''} 
             topic={post_data.post.topic ?? ''}
             comments={post_data.comments ?? []} 
