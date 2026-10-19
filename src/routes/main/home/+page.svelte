@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Thumbnail, Featured, Loading, LoadingMore } from "$lib";
+    import { Thumbnail, Featured, Skeleton, LoadingMore } from "$lib";
     import { onDestroy, onMount } from "svelte";
    
     const { data } = $props();
@@ -111,7 +111,7 @@
 
 <div class="posts-container" class:content-loaded={!is_initial_load}>
     {#await data.streamed}
-        <Loading text="Loading posts..."/>
+        <Skeleton type="posts" count={4}/>
     {:then posts_data}
         <div class="posts-list">
             {#each posts as post}
@@ -134,7 +134,7 @@
     <!-- Always keep sentinel visible at the bottom -->
     <div bind:this={sentinel} class="sentinel">
         {#if is_loading && !is_initial_load}
-            <LoadingMore/>
+            <Skeleton type="posts" count={2}/>
         {:else if !has_more_posts && posts.length > 0}
             <div class="end-message">No more posts to load</div>
         {/if}

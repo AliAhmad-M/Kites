@@ -26,7 +26,7 @@ export const GET: RequestHandler = async ({ url }) => {
                         id: true,
                         username: true,
                         image: {
-                            select: { binary_blob: true, mime_type: true },
+                            select: { id: true },
                         },
                     },
                 },
@@ -37,7 +37,7 @@ export const GET: RequestHandler = async ({ url }) => {
         const comments_with_pfps = comments.map((comment) => ({
             ...comment,
             author_pfp: comment.author?.image
-                ? `data:${comment.author.image.mime_type};base64,${Buffer.from(comment.author.image.binary_blob).toString("base64")}`
+                ? `/api/user/image/${encodeURIComponent(comment.author.username)}`
                 : null,
 
             author_name: comment.author?.username,

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from "$app/state";
-    import { Icon, Tooltip, Engagement, ForumComment, is_dark_mode, LoadingMore } from "$lib";	
+    import { Icon, Tooltip, Engagement, ForumComment, is_dark_mode, LoadingMore, lazyImage } from "$lib";
 	import { onDestroy, onMount } from "svelte";
 	import sanitizeHtml from "sanitize-html";
 	import { goto } from "$app/navigation";
@@ -162,11 +162,11 @@
         <div class="author">
             {#if pfp}
                 <button class="pfp-button" onclick={() => goto(`/main/user/${username}`)}>
-                    <img src={pfp || "/placeholder.svg"} alt="pfp" class="pfp">
+                    <img use:lazyImage={{ src: pfp || "/profile.jpg" }} src={pfp || "/profile.jpg"} alt="pfp" class="pfp"/>
                 </button>
             {:else}
                 <button class="pfp-button" onclick={() => goto(`/main/user/${username}`)}>
-                    <img class="pfp" src="/profile.jpg" alt="pfp">
+                    <img use:lazyImage={{ src: "/profile.jpg" }} src="/profile.jpg" alt="pfp" class="pfp"/>
                 </button>
             {/if}
             <p class="user-name">{username}</p>
@@ -208,7 +208,7 @@
             {safe_html}
         </p>
         {#if image}
-            <img src={image || "/placeholder.svg"} alt="" class="post-image">
+            <img use:lazyImage={{ src: image || "/placeholder.svg" }} src={image || "/placeholder.svg"} alt="" class="post-image"/>
         {/if}
 
         <Engagement post_id={post_id} topic={topic} user_liked={user_liked}/>

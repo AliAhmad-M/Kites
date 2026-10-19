@@ -47,6 +47,35 @@ button {
     cursor: pointer;
 }
 
+.lazy-image {
+    background-color: var(--color-background-secondary);
+    background-image: linear-gradient(
+        100deg,
+        var(--color-background-secondary) 30%,
+        color-mix(in srgb, var(--color-background-secondary) 65%, var(--color-text-secondary)) 50%,
+        var(--color-background-secondary) 70%
+    );
+    background-size: 200% 100%;
+    animation: lazy-image-shimmer 1.4s ease-in-out infinite;
+}
+
+.lazy-image.lazy-image-loaded {
+    animation: none;
+    background-image: none;
+}
+
+@keyframes lazy-image-shimmer {
+    to {
+        background-position: -200% 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lazy-image {
+        animation: none;
+    }
+}
+
 @media screen and (max-width: 1024px) {
     html {
         font-size: 15px !important;

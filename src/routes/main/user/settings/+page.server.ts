@@ -1,7 +1,13 @@
 import { fail, redirect } from '@sveltejs/kit';
-import type { Actions } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 import { prisma } from '$lib/server/prisma.server';
 import bcrypt from 'bcryptjs';
+
+export const load: PageServerLoad = ({ locals }) => {
+    if (!locals.user) {
+        throw redirect(303, '/login/signin');
+    }
+};
 
 export const actions: Actions = {
     update_username: async ({ request, locals }) => {

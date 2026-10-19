@@ -3,7 +3,7 @@ import { prisma } from '$lib/server/prisma.server';
 import { error } from '@sveltejs/kit';
 import { get_dashboard_data } from '$lib/server/dashboard.server';
 
-export async function load({ params }) {
+export async function load({ params, locals }) {
     // Access username from route parameters
     const { username } = params;
     
@@ -27,7 +27,7 @@ export async function load({ params }) {
                     rank: true,
                     email: true,
                     image: {
-                        select: { binary_blob: true, mime_type: true }
+                        select: { id: true }
                     }
                 }
             });
@@ -36,24 +36,54 @@ export async function load({ params }) {
                 return {};
             }
             
-            const email = user.email;
+            const is_owner = locals.user?.username === user.username;
+            const email = is_owner ? user.email : null;
             const rank = user.rank;
             
-            let image_url = null;
-            if (user.image) {
-                // Convert Prisma Bytes (Buffer) to base64
-                const base64 = Buffer.from(user.image.binary_blob).toString('base64');
-                image_url = `data:${user.image.mime_type};base64,${base64}`;
-            }
+            const image_url = user.image
+                ? `/api/user/image/${encodeURIComponent(user.username)}`
+                : null;
+
+            const post_filter = { author_name: user.username };
+            const [posts, post_count, likes_total] = await Promise.all([
+                prisma.forumPosts.findMany({
+                    where: post_filter,
+                    orderBy: { id: 'desc' },
+                    take: 8,
+                    select: {
+                        id: true,
+                        heading: true,
+                        topic: true,
+                        type: true,
+                        likes: true,
+                        image: { select: { id: true } }
+                    }
+                }),
+                prisma.forumPosts.count({ where: post_filter }),
+                prisma.forumPosts.aggregate({
+                    where: post_filter,
+                    _sum: { likes: true }
+                })
+            ]);
+
+            const profile_posts = posts.map(({ image, ...post }) => ({
+                ...post,
+                image_url: image ? `/api/forum/image/${post.id}` : null
+            }));
             
             // Get admin dashboard stats
-            const dashboard_data = await get_dashboard_data(user.rank);
+            const dashboard_data = is_owner && user.rank === "Admin"
+                ? await get_dashboard_data(user.rank)
+                : null;
     
             // Return profile page data
             return {
                 email: email,
                 rank: rank,
                 image: image_url,
+                posts: profile_posts,
+                post_count,
+                likes_received: likes_total._sum.likes ?? 0,
                 admin_stats: dashboard_data
             };
         } catch (e) {

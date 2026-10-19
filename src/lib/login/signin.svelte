@@ -1,19 +1,24 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
     let { form } = $props();
+    let is_submitting = $state(false);
 </script>
 
 <div class="content">
     <div class="card">
         <h1>Sign In</h1>
-        <form use:enhance={( {} ) => {
+        <form use:enhance={() => {
+                is_submitting = true;
                 return async ({ result, update }) => {
-                    // Redirect to homepage
-                    if (result.status === 200) {
-                        window.location.href = "/main/home";
-                    }
+                    try {
+                        if (result.status === 200) {
+                            window.location.href = "/main/home";
+                        }
 
-                    await update();
+                        await update();
+                    } finally {
+                        is_submitting = false;
+                    }
                 };
             }} method="POST" action="?/login">
             <div class="form-group">
@@ -32,7 +37,9 @@
                 {/if}
             </div>
             
-            <button class="confirm">Sign In</button>
+            <button class="confirm" disabled={is_submitting}>
+                {is_submitting ? 'Signing in...' : 'Sign In'}
+            </button>
         </form>
         <p>Don't have an account? <a href="/login/signup" class="other">Sign Up</a></p>             
     </div>

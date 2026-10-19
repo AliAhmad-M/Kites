@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { lazyImage } from "$lib";
     const { posts } = $props();
 </script>
 
@@ -9,9 +10,9 @@
             {#each posts as post}
                 <div class="featured-post">
                     <img
+                        use:lazyImage={{ src: post.author_pfp || '/profile.jpg' }}
                         src={post.author_pfp || '/profile.jpg'}
                         alt={post.author_name}
-                        onerror={(e) => { const target = e.target as HTMLImageElement; if (target) target.src = '/profile.jpg'; }}
                         class="author-pfp"
                     />
                     <div class="post-info">

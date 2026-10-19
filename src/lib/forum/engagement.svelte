@@ -10,22 +10,25 @@
     } = $props();
 
     let liked = $state(user_liked);
+    let is_liking = $state(false);
     let show_modal = $state(false);
     
     let comment_text = $state("");
     let is_submitting = $state(false);
     
     async function handle_like_button() {
+        if (is_liking) return;
+
         if (!page.data.authenticated) {
             goto('/login/signin');
             return;
         }
 
-        try {
-            // Temporarily update like status
-            liked = !liked;
+        const previous_liked = liked;
+        is_liking = true;
+        liked = !liked;
 
-            // Send API request to like/unlike post
+        try {
             const response = await fetch('/api/forum/like', {
                 method: 'POST',
                 headers: {
@@ -37,14 +40,16 @@
                 })
             });
 
-            // Reverse status if error
             if (response.status !== 200) {
-                liked = !liked;
+                liked = previous_liked;
                 const data = await response.json();
                 alert(data.error);
             }
         } catch (e) {
+            liked = previous_liked;
             console.error('[KITES | ERROR]: ', e);
+        } finally {
+            is_liking = false;
         }
     }
     
@@ -134,11 +139,11 @@
 </script>
 
 <div class="engagement">
-    <button class="engagement-btn like-btn {liked ? 'liked' : ''}" onclick={handle_like_button}>
+    <button class="engagement-btn like-btn {liked ? 'liked' : ''}" onclick={handle_like_button} disabled={is_liking} aria-busy={is_liking}>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill={liked ? "#f43f5e" : "none"} stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
         </svg>
-        <span>Like</span>
+        <span>{is_liking ? 'Saving...' : 'Like'}</span>
     </button>
     <button class="engagement-btn comment-btn" onclick={toggle_modal}>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

@@ -23,14 +23,14 @@ export async function load({ locals, params }) {
                 include: {
                     // Get cover image
                     image: {
-                        select: { binary_blob: true, mime_type: true }
+                        select: { id: true }
                     },
     
                     // Get author profile picture
                     author: {
                         select: {
                             image: {
-                                select: { binary_blob: true, mime_type: true }
+                                select: { id: true }
                             }
                         }
                     },
@@ -64,26 +64,23 @@ export async function load({ locals, params }) {
             const comments_with_pfps = post.forum_comments.map(comment => ({
                 ...comment,
                 author_pfp: comment.author?.image 
-                    ? `data:${comment.author.image.mime_type};base64,${Buffer.from(comment.author.image.binary_blob).toString('base64')}`
+                    ? `/api/user/image/${encodeURIComponent(comment.author_name)}`
                     : null
             }));
             
-            const cover_image = post.image;
-            const author_pfp = post.author.image;
-
             return {
                 // Remove duplicate comment data
                 post: { ...post, forum_comments: undefined },
     
-                image: cover_image
-                    ? `data:${cover_image.mime_type};base64,${Buffer.from(cover_image.binary_blob).toString('base64')}`
+                image: post.image
+                    ? `/api/forum/image/${post.id}`
                     : null,
                 
                 user_id : user ? user.id : null,  
                 user_liked: post.user_likes ? post.user_likes.length > 0 : false,            
                 
-                author_pfp: author_pfp 
-                    ? `data:${author_pfp.mime_type};base64,${Buffer.from(author_pfp.binary_blob).toString('base64')}`
+                author_pfp: post.author.image
+                    ? `/api/user/image/${encodeURIComponent(post.author_name)}`
                     : null,
                 
                 comments: comments_with_pfps

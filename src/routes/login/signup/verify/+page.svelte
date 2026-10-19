@@ -5,6 +5,7 @@
 
     let error_message = $state('');
     let is_loading = $state(false);
+    let is_resending = $state(false);
 
     // Handle OTP input auto-focus
     function handle_input(e: Event, nextId?: string) {
@@ -17,6 +18,7 @@
     }
 
     async function validate() {
+        if (is_loading) return;
         if (!(otp_input.length === 6 && otp_input.every(digit => digit !== undefined && digit !== null))) {
             return;
         }
@@ -64,11 +66,14 @@
     }
 
     async function resend() {
+        if (is_resending) return;
+        is_resending = true;
         try {
-            const response = await fetch('/api/otp/resend', { method: "POST" });
-            
+            await fetch('/api/otp/resend', { method: "POST" });
         } catch(e) {
-
+            console.error('[KITES | ERROR]: Could not resend verification code:', e);
+        } finally {
+            is_resending = false;
         }
     }
 
@@ -106,7 +111,7 @@
 
         <button 
             class="confirm" onclick={validate}
-            disabled={!(otp_input.length === 6 && otp_input.every(digit => digit !== undefined && digit !== null))}
+            disabled={is_loading || !(otp_input.length === 6 && otp_input.every(digit => digit !== undefined && digit !== null))}
         >
             {#if is_loading}
                 Verifying...
@@ -117,7 +122,9 @@
         
         <p class="resend">
             Didn't receive a code? 
-            <button onclick={resend} class="other">Resend</button>
+            <button onclick={resend} class="other" disabled={is_resending}>
+                {is_resending ? 'Sending...' : 'Resend'}
+            </button>
         </p>
     </div>
 </div>

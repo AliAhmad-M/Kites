@@ -3,10 +3,8 @@
 	import { page } from "$app/state";
     
     let { form } = $props();
-
-    if (!page.data.user) {
-        window.location.href = '/login/signin';
-    }
+    let is_updating_username = $state(false);
+    let is_changing_password = $state(false);
 </script>
 
 <svelte:head>
@@ -17,19 +15,42 @@
     <main class="content">
         <div class="settings-wrapper">
             <div class="settings-header">
-                <h1>Account Settings</h1>
-                <p class="settings-subtitle">Manage your account preferences and security settings</p>
+                <a class="settings-back" href="/main/user/{page.data.user?.username}">
+                    <span aria-hidden="true">←</span> Profile
+                </a>
+                <div class="settings-heading-row">
+                    <div>
+                        <p class="settings-kicker">ACCOUNT</p>
+                        <h1>Settings</h1>
+                        <p class="settings-subtitle">Manage your identity and sign-in security.</p>
+                    </div>
+                    <div class="account-chip">
+                        <span class="account-avatar" aria-hidden="true">{page.data.user?.username?.slice(0, 1).toUpperCase()}</span>
+                        <span>{page.data.user?.username}</span>
+                    </div>
+                </div>
             </div>
 
             <div class="settings-grid">
-                <!-- Username Settings Card -->
-                <div class="settings-card">
+                <section class="settings-card" id="account">
                     <div class="card-header">
-                        <h2>Username</h2>
-                        <p class="card-description">Update your display name</p>
+                        <span class="section-index">01</span>
+                        <div>
+                            <h2>Account name</h2>
+                            <p class="card-description">Choose how people find you across Kites.</p>
+                        </div>
                     </div>
                     
-                    <form method="POST" action="?/update_username" use:enhance class="settings-form">
+                    <form method="POST" action="?/update_username" use:enhance={() => {
+                        is_updating_username = true;
+                        return async ({ update }) => {
+                            try {
+                                await update();
+                            } finally {
+                                is_updating_username = false;
+                            }
+                        };
+                    }} class="settings-form">
                         <div class="form-group">
                             <label for="current_username" class="form-label">Current Username</label>
                             <input 
@@ -54,33 +75,44 @@
                             />
                             
                             {#if form?.username_error}
-                                <div class="error-message">
+                                <div class="error-message" role="alert">
                                     <span class="error-icon">⚠</span>
                                     {form.username_error}
                                 </div>
                             {/if}
                             {#if form?.username_success}
-                                <div class="success-message">
+                                <div class="success-message" role="status">
                                     <span class="success-icon">✓</span>
                                     Username updated successfully!
                                 </div>
                             {/if}
                         </div>
 
-                        <button type="submit" class="primary-button">
-                            Update Username
+                        <button type="submit" class="primary-button" disabled={is_updating_username}>
+                            {is_updating_username ? 'Updating...' : 'Update Username'}
                         </button>
                     </form>
-                </div>
+                </section>
 
-                <!-- Password Settings Card -->
-                <div class="settings-card">
+                <section class="settings-card" id="security">
                     <div class="card-header">
-                        <h2>Password</h2>
-                        <p class="card-description">Change your account password</p>
+                        <span class="section-index">02</span>
+                        <div>
+                            <h2>Password &amp; security</h2>
+                            <p class="card-description">Use a strong password you do not reuse elsewhere.</p>
+                        </div>
                     </div>
                     
-                    <form method="POST" action="?/change_password" use:enhance class="settings-form">
+                    <form method="POST" action="?/change_password" use:enhance={() => {
+                        is_changing_password = true;
+                        return async ({ update }) => {
+                            try {
+                                await update();
+                            } finally {
+                                is_changing_password = false;
+                            }
+                        };
+                    }} class="settings-form">
                         <div class="form-group">
                             <label for="current_password" class="form-label">Current Password</label>
                             <input 
@@ -119,23 +151,23 @@
                         </div>
 
                         {#if form?.password_error}
-                            <div class="error-message">
+                            <div class="error-message" role="alert">
                                 <span class="error-icon">⚠</span>
                                 {form.password_error}
                             </div>
                         {/if}
                         {#if form?.password_success}
-                            <div class="success-message">
+                            <div class="success-message" role="status">
                                 <span class="success-icon">✓</span>
                                 Password updated successfully!
                             </div>
                         {/if}
 
-                        <button type="submit" class="primary-button">
-                            Change Password
+                        <button type="submit" class="primary-button" disabled={is_changing_password}>
+                            {is_changing_password ? 'Updating password...' : 'Change Password'}
                         </button>
                     </form>
-                </div>
+                </section>
             </div>
         </div>
     </main>
@@ -332,28 +364,204 @@
         font-weight: bold;
     }
 
+    .settings-wrapper {
+        width: min(100%, 1040px);
+        box-sizing: border-box;
+        padding: 2.5rem 1.5rem 4rem;
+    }
+
+    .settings-header {
+        text-align: left;
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.75rem;
+        border-bottom: 1px solid var(--color-navigation-border);
+    }
+
+    .settings-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.75rem;
+        color: var(--color-text-secondary);
+        font-size: 0.88rem;
+        text-decoration: none;
+    }
+
+    .settings-back:hover {
+        color: var(--color-blue-secondary);
+    }
+
+    .settings-heading-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+    }
+
+    .settings-kicker {
+        margin: 0 0 0.3rem;
+        color: var(--color-blue-secondary);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+    }
+
+    .settings-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        line-height: 1.2;
+    }
+
+    .settings-subtitle {
+        margin: 0.5rem 0 0;
+        color: var(--color-text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .account-chip {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        max-width: 45%;
+        padding: 0.5rem 0.75rem 0.5rem 0.5rem;
+        border: 1px solid var(--color-navigation-border);
+        border-radius: 2rem;
+        color: var(--color-text-primary);
+        font-size: 0.85rem;
+        overflow-wrap: anywhere;
+    }
+
+    .account-avatar {
+        display: grid;
+        flex: none;
+        place-items: center;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        background: var(--color-blue-primary);
+        color: #fff;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .settings-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+        gap: 2.5rem;
+    }
+
+    .settings-card,
+    .settings-card:hover {
+        width: auto;
+        min-width: 0;
+        max-width: none;
+        padding: 1.4rem;
+        border: 1px solid var(--color-navigation-border);
+        border-top: 2px solid var(--color-blue-primary);
+        border-radius: 0.45rem;
+        background: var(--color-background-secondary);
+        box-shadow: none;
+        transform: none;
+    }
+
+    .card-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.9rem;
+        margin: 0 0 1.4rem;
+        padding: 0 0 1rem;
+        border-bottom: 1px solid var(--color-navigation-border);
+    }
+
+    .section-index {
+        color: var(--color-blue-secondary);
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .card-header h2 {
+        margin: 0;
+        font-size: 1.15rem;
+    }
+
+    .card-description {
+        margin-top: 0.35rem;
+        color: var(--color-text-secondary);
+        font-size: 0.86rem;
+        opacity: 1;
+    }
+
+    .settings-form {
+        gap: 1.15rem;
+    }
+
+    .form-label {
+        color: var(--color-text-secondary);
+        font-size: 0.82rem;
+    }
+
+    .form-input {
+        min-width: 0;
+        box-sizing: border-box;
+        padding: 0.75rem 0.85rem;
+        border: 1px solid var(--color-navigation-border);
+        border-radius: 0.35rem;
+        font-family: inherit;
+        font-size: 0.92rem;
+    }
+
+    .form-input:focus {
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-blue-primary) 18%, transparent);
+    }
+
+    .primary-button {
+        align-self: flex-start;
+        min-height: 2.7rem;
+        padding: 0.65rem 1rem;
+        margin-top: 0.25rem;
+        border-radius: 0.35rem;
+        font-size: 0.9rem;
+    }
+
+    .primary-button:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
     @media (max-width: 768px) {
+        .settings-grid {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
         .settings-card {
-            padding: 1.5rem;
+            padding: 1.1rem;
         }
 
         .settings-header h1 {
-            font-size: 2rem;
+            font-size: 1.8rem;
         }
 
         .settings-wrapper {
-            padding: 1rem;
+            padding: 1.5rem 1rem 3rem;
         }
     }
 
     @media (max-width: 480px) {
-        .settings-card {
-            padding: 1rem;
+        .settings-heading-row {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .account-chip {
+            max-width: 100%;
         }
 
         .form-input,
         .primary-button {
-            padding: 0.75rem;
+            padding: 0.7rem 0.75rem;
         }
     }
 </style>

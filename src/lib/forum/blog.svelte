@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
     import { page } from "$app/state";
-    import { Engagement, Icon, Tooltip, ForumComment, is_dark_mode, LoadingMore } from "$lib";	
+    import { Engagement, Icon, Tooltip, ForumComment, is_dark_mode, LoadingMore, lazyImage } from "$lib";	
     import { marked } from 'marked';
     import sanitizeHtml from 'sanitize-html';
 	import { onDestroy, onMount } from "svelte";
@@ -185,11 +185,11 @@
             <div class="blog-author">
                 {#if pfp}
                     <button class="pfp-button" onclick={() => goto(`/main/user/${username}`)}>
-                        <img src={pfp || "/placeholder.svg"} alt="{username}'s profile" class="blog-author-image">
+                        <img use:lazyImage={{ src: pfp || "/profile.jpg" }} src={pfp || "/profile.jpg"} alt="{username}'s profile" class="blog-author-image"/>
                     </button>
                 {:else}
                     <button class="pfp-button" onclick={() => goto(`/main/user/${username}`)}>
-                        <img class="blog-author-image" src="/profile.jpg" alt="{username}'s profile">
+                        <img use:lazyImage={{ src: "/profile.jpg" }} src="/profile.jpg" alt="{username}'s profile" class="blog-author-image"/>
                     </button>
                 {/if}
                 <div class="blog-author-info">
@@ -226,7 +226,7 @@
     
     {#if image}
         <div class="blog-featured-image-container">
-            <img src={image || "/placeholder.svg"} alt="Featured image for {heading}" class="blog-featured-image">
+            <img use:lazyImage={{ src: image || "/placeholder.svg", priority: true }} src={image || "/placeholder.svg"} alt="Featured image for {heading}" class="blog-featured-image"/>
         </div>
     {/if}
     

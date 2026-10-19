@@ -1,6 +1,6 @@
 <script>
 	import { goto } from "$app/navigation";
-	import { Engagement } from "$lib";
+    import { Engagement, lazyImage } from "$lib";
 
     const { 
         post_id, 
@@ -19,11 +19,11 @@
     <div class="header">
         {#if pfp}
         <button class="pfp-button" onclick={() => goto(`/main/user/${username}`)}>
-            <img src={pfp} alt="pfp" class="pfp">
+            <img use:lazyImage={{ src: pfp }} src={pfp} alt="pfp" class="pfp"/>
         </button>
         {:else}
         <button class="pfp-button" onclick={() => goto(`/main/user/${username}`)}>
-            <img class="pfp" src="/profile.jpg" alt="pfp">
+            <img use:lazyImage={{ src: "/profile.jpg" }} src="/profile.jpg" alt="pfp" class="pfp"/>
         </button>
         {/if}
         <span class="username">{username}</span>
@@ -32,7 +32,7 @@
     <a href='/main/forum_posts/{topic}/{post_id}'>
         <h3 class="title">{heading}</h3>
         {#if image}
-          <img src={image} alt="cover" class="cover">
+          <img use:lazyImage={{ src: image }} src={image} alt="cover" class="cover"/>
         {/if}
     </a>
     <Engagement post_id={post_id} topic={topic} user_liked={user_liked} />

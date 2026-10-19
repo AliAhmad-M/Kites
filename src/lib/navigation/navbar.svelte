@@ -2,6 +2,7 @@
     import { sidebar_collapsed, toggle_theme, is_dark_mode, Icon, Tooltip } from "$lib";
     import { page } from "$app/state";
 	import { goto } from "$app/navigation";
+    import { lazyImage } from "$lib";
 
     let { image } = $props();
     let folder = $state("dark_mode_icons");
@@ -68,9 +69,9 @@
         <Tooltip text="Profile">
                 <button onclick={() => goto(`/main/user/${page.data.user.username}`)} class="profile">
                     {#if image}
-                        <img src={image} alt="pfp" class="pfp">
+                        <img use:lazyImage={{ src: image }} src={image} alt="pfp" class="pfp"/>
                     {:else}
-                        <img src="/profile.jpg" alt="pfp" class="pfp">
+                        <img use:lazyImage={{ src: "/profile.jpg" }} src="/profile.jpg" alt="pfp" class="pfp"/>
                     {/if}
                 </button>       
         </Tooltip>

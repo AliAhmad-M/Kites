@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 import { page } from "$app/state";
-    import { Icon, Tooltip, is_dark_mode } from "$lib";
+    import { Icon, Tooltip, is_dark_mode, lazyImage } from "$lib";
     import sanitizeHtml from 'sanitize-html';
 
     let { comment_data } = $props();
@@ -80,11 +80,11 @@ import { page } from "$app/state";
     <div class="comment-wrapper">
         {#if comment_data.author_pfp}
             <button class="pfp-button" onclick={() => goto(`/main/user/${comment_data.author_name}`)}>
-                <img class="comment-avatar" src={comment_data.author_pfp || "/placeholder.svg"} alt="avatar" />
+                <img use:lazyImage={{ src: comment_data.author_pfp || "/profile.jpg" }} src={comment_data.author_pfp || "/profile.jpg"} alt="avatar" class="comment-avatar" />
             </button>
         {:else}
             <button class="pfp-button" onclick={() => goto(`/main/user/${comment_data.author_name}`)}>
-                <img class="comment-avatar" src="/profile.jpg" alt="avatar" />
+                <img use:lazyImage={{ src: "/profile.jpg" }} src="/profile.jpg" alt="avatar" class="comment-avatar" />
             </button>
         {/if}
         <div class="comment-content">

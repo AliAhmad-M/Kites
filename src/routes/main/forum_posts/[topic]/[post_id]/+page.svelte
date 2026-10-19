@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { DiscussionPost, BlogPost, Loading } from "$lib";
+    import { DiscussionPost, BlogPost, Skeleton } from "$lib";
     const { data } = $props();
 </script>
 
 {#await data.streamed}
-    <Loading text="Loading post..."/>
+    <Skeleton type="post-detail"/>
 {:then post_data}
     {#if post_data?.post?.type?.toLowerCase() === 'discussion'}
         <DiscussionPost

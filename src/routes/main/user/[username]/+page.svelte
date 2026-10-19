@@ -1,11 +1,13 @@
 <script lang="ts">
-    import { is_dark_mode, Loading, Icon, Tooltip, Dashboard } from '$lib';
+    import { is_dark_mode, Skeleton, Icon, Tooltip, Dashboard, lazyImage } from '$lib';
     import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 
     const { data } = $props();
 
     let image: File | undefined = $state();
+    let is_uploading_pfp = $state(false);
+    let is_logging_out = $state(false);
     
     let show_dropdown = $state(false);
     let show_confirm = $state(false);
@@ -25,7 +27,8 @@
             image = undefined;
         }
 
-        if (!image) return;
+        if (!image || is_uploading_pfp) return;
+        is_uploading_pfp = true;
         
         try {
             const form_data = new FormData();
@@ -44,10 +47,14 @@
             }
         } catch (e) {
             console.error('[KITES | ERROR]: ', e);
+        } finally {
+            is_uploading_pfp = false;
         }
     }
     
     async function logout() {
+        if (is_logging_out) return;
+        is_logging_out = true;
         try {
             const resp = await fetch('/api/user/logout', { method: 'POST' });
             
@@ -59,10 +66,13 @@
             }
         } catch(e) {
             console.error(e);
+        } finally {
+            is_logging_out = false;
         }
     }
 
     async function delete_account() {
+        if (is_deleting) return;
         try {
             is_deleting = true;
             const resp = await fetch('/api/user/delete', { 
@@ -120,7 +130,7 @@
 
 <div class="container">
     {#await data.streamed}
-        <Loading text="Loading user..."/>
+        <Skeleton type="user"/>
     {:then user_data}
         <div class="profile-card">
             <div class="details">
@@ -128,9 +138,9 @@
                     {#if data.authenticated && data.user?.username === page.params.username}
                         <label for="image" class="pfp-label">
                             {#if user_data?.image}
-                                <img src={user_data?.image || "/placeholder.svg"} alt="pfp" class="pfp">
+                                <img use:lazyImage={{ src: user_data.image }} src={user_data.image} alt="pfp" class="pfp"/>
                             {:else}
-                                <img src="/profile.jpg" alt="pfp" class="pfp">
+                                <img use:lazyImage={{ src: "/profile.jpg" }} src="/profile.jpg" alt="pfp" class="pfp"/>
                             {/if}
                             <div class="pfp-overlay">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -138,13 +148,16 @@
                                     <circle cx="12" cy="7" r="4"></circle>
                                 </svg>
                             </div>
+                            {#if is_uploading_pfp}
+                                <span class="uploading-label">Uploading...</span>
+                            {/if}
                         </label>
-                        <input type="file" id="image" name="image" accept="image/*" onchange={change_pfp}>
+                        <input type="file" id="image" name="image" accept="image/*" onchange={change_pfp} disabled={is_uploading_pfp}>
                     {:else}
                         {#if user_data?.image}
-                            <img src={user_data?.image || "/placeholder.svg"} alt="pfp" class="pfp">
+                            <img use:lazyImage={{ src: user_data.image }} src={user_data.image} alt="pfp" class="pfp"/>
                         {:else}
-                            <img src="/profile.jpg" alt="pfp" class="pfp">
+                            <img use:lazyImage={{ src: "/profile.jpg" }} src="/profile.jpg" alt="pfp" class="pfp"/>
                         {/if}
                     {/if}
                 </div>
@@ -156,9 +169,11 @@
                                 <Icon mode={undefined} name={user_data?.rank} width=36 height=36 alt="verified"/>
                             </Tooltip>
                         {/if}
-                        
                     </div>
-                    <h4 class="email-id">{user_data?.email}</h4>
+                    <p class="profile-handle">@{page.params.username}</p>
+                    {#if data.authenticated && data.user?.username === page.params.username}
+                        <p class="email-id">{user_data?.email}</p>
+                    {/if}
                 </div>
                 
                 {#if (data.authenticated && data.user?.username === page.params.username) || data.rank === "Admin"}
@@ -197,17 +212,81 @@
                         </svg>
                         Settings
                     </button>
-                    <button class="logout-button" onclick={logout}>
+                    <button class="logout-button" onclick={logout} disabled={is_logging_out}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                             <polyline points="16 17 21 12 16 7"></polyline>
                             <line x1="21" y1="12" x2="9" y2="12"></line>
                         </svg>
-                        Log Out
+                        {is_logging_out ? 'Logging out...' : 'Log Out'}
                     </button>
                 </div>
             {/if}
-        </div>        
+        </div>
+        <div class="profile-grid">
+            <section class="activity-section" id="posts" aria-labelledby="posts-heading">
+                <div class="section-heading">
+                        <h2 id="posts-heading">Posts</h2>
+                </div>
+
+                {#each user_data.posts as post (post.id)}
+                    <article class="activity-post">
+                        <div class="post-meta">
+                            <span>{post.topic}</span>
+                            <span class="meta-divider">/</span>
+                            <span>{post.type}</span>
+                        </div>
+                        <h3>
+                            <a href="/main/forum_posts/{post.topic}/{post.id}">{post.heading}</a>
+                        </h3>
+                        {#if post.image_url}
+                            <a class="post-image-link" href="/main/forum_posts/{post.topic}/{post.id}" tabindex="-1" aria-hidden="true">
+                                <img use:lazyImage={{ src: post.image_url }} src={post.image_url} alt="" class="post-image" />
+                            </a>
+                        {/if}
+                        <div class="post-footer">
+                            <span>{post.likes} {post.likes === 1 ? 'like' : 'likes'}</span>
+                            <a href="/main/forum_posts/{post.topic}/{post.id}">View post <span aria-hidden="true">→</span></a>
+                        </div>
+                    </article>
+                {:else}
+                    <div class="empty-posts">
+                        <span class="empty-mark" aria-hidden="true">✳</span>
+                        <h3>No posts yet</h3>
+                        <p>{data.authenticated && data.user?.username === page.params.username ? 'Your posts will show up here.' : 'There is no activity to show yet.'}</p>
+                        {#if data.authenticated && data.user?.username === page.params.username}
+                            <a href="/main/forum_posts/create_blog">Create your first post</a>
+                        {/if}
+                    </div>
+                {/each}
+            </section>
+
+            <aside class="profile-rail" aria-label="Profile information">
+                <section class="rail-section">
+                    <h2>About</h2>
+                    <div class="about-row">
+                        <span class="about-label">Rank</span>
+                        <span class="about-value">{user_data.rank === 'default' ? 'Member' : user_data.rank}</span>
+                    </div>
+                    {#if data.authenticated && data.user?.username === page.params.username}
+                        <div class="about-row email-row">
+                            <span class="about-label">Email</span>
+                            <span class="about-value">{user_data.email}</span>
+                        </div>
+                    {/if}
+                </section>
+                <section class="rail-section stats-section" aria-label="Activity statistics">
+                    <div class="stat-block">
+                        <strong>{user_data.post_count}</strong>
+                        <span>Posts</span>
+                    </div>
+                    <div class="stat-block">
+                        <strong>{user_data.likes_received}</strong>
+                        <span>Likes received</span>
+                    </div>
+                </section>
+            </aside>
+        </div>
         {#if user_data?.rank === "Admin" && data.rank === "Admin" && data.authenticated && data.user?.username === page.params.username}
             <Dashboard admin_stats={user_data?.admin_stats} />
         {/if}
@@ -219,10 +298,10 @@
                 <h3>Delete Account?</h3>
                 <p>This action cannot be undone. All your data will be permanently deleted.</p>
                 <div class="confirm-buttons">
-                    <button class="cancel-button" onclick={cancel_delete}>
+                    <button class="cancel-button" onclick={cancel_delete} disabled={is_deleting}>
                         Cancel
                     </button>
-                    <button class="delete-button" onclick={delete_account}>
+                    <button class="delete-button" onclick={delete_account} disabled={is_deleting}>
                         {is_deleting ? "Deleting..." : "Delete"}
                     </button>
                 </div>
@@ -314,6 +393,17 @@
 
     .pfp-overlay svg {
         margin-bottom: 0.25rem;
+    }
+
+    .uploading-label {
+        position: absolute;
+        inset: 4px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.58);
+        color: #fff;
+        font-size: 0.75rem;
     }
 
     .pfp-label:hover .pfp-overlay {
@@ -581,33 +671,369 @@
         display: none;
     }
 
+    .container {
+        display: block;
+        width: min(100%, 1080px);
+        margin: 0 auto;
+        padding: 0 1.25rem 3rem;
+        box-sizing: border-box;
+    }
+
+    .profile-card {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        max-width: none;
+        box-sizing: border-box;
+        padding: 0 2rem 1.5rem;
+        border: 1px solid var(--color-navigation-border);
+        border-radius: 0.5rem;
+        background: var(--color-background-secondary);
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .details {
+        position: relative;
+        z-index: 1;
+        align-items: center;
+        gap: 1.25rem;
+        width: auto;
+        margin: 0 -2rem;
+        padding: 1.5rem 2rem;
+    }
+
+    .pfp {
+        display: block;
+        width: 8rem;
+        height: 8rem;
+        box-sizing: border-box;
+        border: 4px solid var(--color-background-secondary);
+        background-color: var(--color-background-secondary);
+        object-fit: cover;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+    }
+
+    .pfp-label {
+        width: 8rem;
+        height: 8rem;
+    }
+
+    .pfp-overlay {
+        inset: 4px;
+        width: auto;
+        height: auto;
+    }
+
+    .user-info {
+        min-width: 0;
+        padding-bottom: 0.3rem;
+    }
+
+    .username-container {
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+
+    .username {
+        overflow-wrap: anywhere;
+        font-size: 1.75rem;
+        line-height: 1.15;
+        letter-spacing: 0;
+    }
+
+    .profile-handle,
+    .email-id {
+        margin: 0.35rem 0 0;
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+        overflow-wrap: anywhere;
+    }
+
+    .more-options {
+        align-self: flex-start;
+        margin: 0 0 0 auto;
+    }
+
+    .more {
+        display: grid;
+        place-items: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 1px solid var(--color-navigation-border);
+        border-radius: 50%;
+        background: var(--color-background-secondary);
+    }
+
+    .divider {
+        height: 1px;
+        margin: 0 0 1.25rem;
+    }
+
+    .buttons {
+        justify-content: flex-end;
+        gap: 0.75rem;
+    }
+
+    .settings-button,
+    .logout-button {
+        flex: 0 0 auto;
+        min-height: 2.6rem;
+        padding: 0.55rem 1rem;
+        border-radius: 0.35rem;
+        font-size: 0.9rem;
+    }
+
+    .settings-button {
+        background: var(--color-blue-primary);
+    }
+
+    .settings-button:hover,
+    .logout-button:hover {
+        transform: none;
+    }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 280px;
+        align-items: start;
+        gap: 1.25rem;
+        margin-top: 1.25rem;
+    }
+
+    .activity-section,
+    .profile-rail {
+        min-width: 0;
+    }
+
+    .rail-section {
+        padding: 1.25rem 1.4rem;
+        border: 1px solid var(--color-navigation-border);
+        border-radius: 0.5rem;
+        background: var(--color-background-secondary);
+    }
+
+    .activity-section {
+        overflow: hidden;
+        border: 1px solid var(--color-navigation-border);
+        border-radius: 0.5rem;
+        background: var(--color-background-secondary);
+    }
+
+    .section-heading {
+        display: flex;
+        align-items: center;
+        padding: 1.25rem 1.4rem;
+        border-bottom: 1px solid var(--color-navigation-border);
+    }
+
+    .section-heading h2,
+    .rail-section h2 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 600;
+    }
+
+    .activity-post {
+        padding: 1.25rem 1.4rem;
+    }
+
+    .activity-post + .activity-post {
+        border-top: 1px solid var(--color-navigation-border);
+    }
+
+    .post-meta {
+        display: flex;
+        gap: 0.5rem;
+        color: var(--color-text-secondary);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+    }
+
+    .meta-divider {
+        color: var(--color-blue-secondary);
+    }
+
+    .activity-post h3 {
+        margin: 0.6rem 0 0.9rem;
+        font-size: 1.15rem;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
+    .activity-post h3 a,
+    .post-footer a {
+        color: var(--color-text-primary);
+        text-decoration: none;
+    }
+
+    .activity-post h3 a:hover,
+    .post-footer a:hover {
+        color: var(--color-blue-secondary);
+    }
+
+    .post-image-link {
+        display: block;
+        overflow: hidden;
+        border-radius: 0.35rem;
+    }
+
+    .post-image {
+        display: block;
+        width: 100%;
+        max-height: 280px;
+        aspect-ratio: 16 / 8;
+        object-fit: cover;
+    }
+
+    .post-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        color: var(--color-text-secondary);
+        font-size: 0.82rem;
+    }
+
+    .post-footer a {
+        color: var(--color-blue-secondary);
+    }
+
+    .profile-rail {
+        position: sticky;
+        top: 1rem;
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .rail-section h2 {
+        margin-bottom: 1rem;
+    }
+
+    .about-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.7rem 0;
+        border-top: 1px solid var(--color-navigation-border);
+        font-size: 0.82rem;
+    }
+
+    .about-label {
+        flex: none;
+        color: var(--color-text-secondary);
+    }
+
+    .about-value {
+        min-width: 0;
+        text-align: right;
+        overflow-wrap: anywhere;
+    }
+
+    .stats-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        padding: 0;
+    }
+
+    .stat-block {
+        display: grid;
+        gap: 0.25rem;
+        padding: 1.1rem 1rem;
+    }
+
+    .stat-block + .stat-block {
+        border-left: 1px solid var(--color-navigation-border);
+    }
+
+    .stat-block strong {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .stat-block span {
+        color: var(--color-text-secondary);
+        font-size: 0.75rem;
+    }
+
+    .empty-posts {
+        padding: 3rem 1.5rem;
+        border-top: 1px solid var(--color-navigation-border);
+        text-align: center;
+    }
+
+    .empty-mark {
+        color: var(--color-blue-secondary);
+        font-size: 1.7rem;
+    }
+
+    .empty-posts h3 {
+        margin: 0.5rem 0;
+        font-size: 1.05rem;
+    }
+
+    .empty-posts p {
+        margin: 0 0 1rem;
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .empty-posts a {
+        color: var(--color-blue-secondary);
+        font-size: 0.9rem;
+        text-decoration: none;
+    }
+
     @media (max-width: 480px) {
         .details {
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .username-container, .email-id {
-            align-self: center;
+            gap: 0.75rem;
+            padding: 1.1rem 0;
             margin: 0;
+            align-items: center;
         }
 
-        .divider { 
-            margin-top: 0;
+        .profile-card {
+            padding-right: 1rem;
+            padding-left: 1rem;
         }
 
-        .more-options {
-            position: relative;
-            top: -160px;
-            left: 120px;
+        .pfp,
+        .pfp-label {
+            width: 6rem;
+            height: 6rem;
         }
 
-        .dropdown-menu {
-            right: -1rem;
+        .username {
+            font-size: 1.35rem;
         }
 
         .buttons {
-            flex-direction: column;
+            justify-content: stretch;
+            gap: 0.5rem;
+        }
+
+        .settings-button,
+        .logout-button {
+            flex: 1;
+            padding-right: 0.5rem;
+            padding-left: 0.5rem;
+        }
+
+        .profile-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .profile-rail {
+            position: static;
+            grid-row: 1;
+        }
+
+        .section-heading,
+        .activity-post,
+        .rail-section:not(.stats-section) {
+            padding-right: 1rem;
+            padding-left: 1rem;
         }
     }
 </style>
