@@ -30,6 +30,7 @@
     let content_text = $state("");
     let topic_chosen = $state("");
     let image: File | undefined = $state(undefined);
+    let image_preview_url = $state("");
 
     let is_creating = $state(false);
     let is_over_limit = $state(false);
@@ -40,6 +41,17 @@
     // Calculate character count and check if over limit
     $effect(() => {
         calculate_character_count();
+    });
+
+    $effect(() => {
+        if (!image) {
+            image_preview_url = "";
+            return;
+        }
+
+        const preview_url = URL.createObjectURL(image);
+        image_preview_url = preview_url;
+        return () => URL.revokeObjectURL(preview_url);
     });
     
     function calculate_character_count() {
@@ -136,7 +148,7 @@
             image = undefined;
             show_modal = false;
 
-            const url = `/main/forum_posts/${data.topic}/${data.post_id}`
+            const url = `/main/posts/${data.topic}/${data.post_id}`
             window.location.href = url;
 
         } catch (e) {
@@ -233,7 +245,7 @@
                         <div class="divider">
                             <span>or</span>
                         </div>
-                        <a href="/main/forum_posts/create_blog" class="create-blog-link">
+                        <a href="/main/posts/create_blog" class="create-blog-link">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -269,10 +281,13 @@
 
                     {#if image}
                         <div class="file-preview">
-                            <span>{image.name}</span>
-                            <button onclick={() => image = undefined} class="remove-file">×</button>
+                            <img class="image-preview" src={image_preview_url} alt={image.name} />
+                            <div class="file-details">
+                                <span class="file-name">{image.name}</span>
+                                <span class="image-size">{(image.size / 1024 / 1024).toFixed(2)} MB</span>
+                            </div>
+                            <button type="button" onclick={() => image = undefined} class="remove-file" aria-label="Remove image">×</button>
                         </div>
-                        <span class="image-size">{(image.size / 1024 / 1024).toFixed(2)} MB</span>
                     {/if}
                 </div>
             </div>
@@ -578,7 +593,7 @@
     .file-preview {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        gap: 0.85rem;
         
         background-color: var(--color-background-primary);
         
@@ -587,6 +602,29 @@
         border-radius: 0.5rem;
         
         font-size: 0.8rem;
+    }
+
+    .image-preview {
+        width: 5rem;
+        height: 4rem;
+        flex: 0 0 auto;
+        object-fit: cover;
+        border-radius: 0.4rem;
+    }
+
+    .file-details {
+        display: flex;
+        min-width: 0;
+        flex: 1;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .file-name {
+        overflow: hidden;
+        color: var(--color-text-primary);
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .image-size {

@@ -60,25 +60,25 @@
         </div>
         <div class="section">
             <h4 class:label-hidden={$sidebar_collapsed}>Topics</h4>
-            <button class:active={page.url.pathname === "/main/forum_posts/Art"} onclick={() => goto('/main/forum_posts/Art')}>
+            <button class:active={page.url.pathname === "/main/posts/Art"} onclick={() => goto('/main/posts/Art')}>
                 <div class="icon-container">
                     <Icon mode={folder} name="art" width={20} height={30} alt="art"/>
                 </div>
                 <span class:label-hidden={$sidebar_collapsed}>Art</span>
             </button>
-            <button class:active={page.url.pathname === "/main/forum_posts/Philosophy"} onclick={() => goto('/main/forum_posts/Philosophy')}>
+            <button class:active={page.url.pathname === "/main/posts/Philosophy"} onclick={() => goto('/main/posts/Philosophy')}>
                 <div class="icon-container">
                     <Icon mode={folder} name="philosophy" width={20} height={30} alt="philosophy"/>
                 </div>
                 <span class:label-hidden={$sidebar_collapsed}>Philosophy</span>
             </button>
-            <button class:active={page.url.pathname === "/main/forum_posts/Nature"} onclick={() => goto('/main/forum_posts/Nature')}>
+            <button class:active={page.url.pathname === "/main/posts/Nature"} onclick={() => goto('/main/posts/Nature')}>
                 <div class="icon-container">
                     <Icon mode={folder} name="nature" width={20} height={30} alt="nature"/>
                 </div>
                 <span class:label-hidden={$sidebar_collapsed}>Nature</span>
             </button>
-            <button class:active={page.url.pathname === "/main/forum_posts/Science"} onclick={() => goto('/main/forum_posts/Science')}>
+            <button class:active={page.url.pathname === "/main/posts/Science"} onclick={() => goto('/main/posts/Science')}>
                 <div class="icon-container">
                     <Icon mode={folder} name="science" width={20} height={30} alt="science"/>
                 </div>

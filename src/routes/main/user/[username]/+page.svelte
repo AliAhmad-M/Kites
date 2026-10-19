@@ -237,16 +237,16 @@
                             <span>{post.type}</span>
                         </div>
                         <h3>
-                            <a href="/main/forum_posts/{post.topic}/{post.id}">{post.heading}</a>
+                            <a href="/main/posts/{post.topic}/{post.id}">{post.heading}</a>
                         </h3>
                         {#if post.image_url}
-                            <a class="post-image-link" href="/main/forum_posts/{post.topic}/{post.id}" tabindex="-1" aria-hidden="true">
+                            <a class="post-image-link" href="/main/posts/{post.topic}/{post.id}" tabindex="-1" aria-hidden="true">
                                 <img use:lazyImage={{ src: post.image_url }} src={post.image_url} alt="" class="post-image" />
                             </a>
                         {/if}
                         <div class="post-footer">
                             <span>{post.likes} {post.likes === 1 ? 'like' : 'likes'}</span>
-                            <a href="/main/forum_posts/{post.topic}/{post.id}">View post <span aria-hidden="true">→</span></a>
+                            <a href="/main/posts/{post.topic}/{post.id}">View post <span aria-hidden="true">→</span></a>
                         </div>
                     </article>
                 {:else}
@@ -255,7 +255,7 @@
                         <h3>No posts yet</h3>
                         <p>{data.authenticated && data.user?.username === page.params.username ? 'Your posts will show up here.' : 'There is no activity to show yet.'}</p>
                         {#if data.authenticated && data.user?.username === page.params.username}
-                            <a href="/main/forum_posts/create_blog">Create your first post</a>
+                            <a href="/main/posts/create_blog">Create your first post</a>
                         {/if}
                     </div>
                 {/each}

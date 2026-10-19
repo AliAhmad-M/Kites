@@ -97,7 +97,7 @@
             comment_text = "";
             show_modal = false;
 
-            const url = `/main/forum_posts/${topic}/${post_id}`
+            const url = `/main/posts/${topic}/${post_id}`
             window.location.href = url;
         } catch (e) {
             console.error('[KITES | ERROR]: Error submitting comment:', e);
@@ -108,7 +108,7 @@
 
     function copy_to_clipboard() {
         // Create absolute URL to the specific post
-        const path = `/main/forum_posts/${topic}/${post_id}`;
+        const path = `/main/posts/${topic}/${post_id}`;
         const absolute_url = new URL(path, window.location.origin).toString();
         
         navigator.clipboard.writeText(absolute_url)
@@ -235,6 +235,10 @@
         transition: all 0.2s ease;
     }
 
+    .engagement-btn:hover {
+        background: var(--color-background-secondary);
+    }
+
     .like-btn:hover, 
     .like-btn.liked {
         color: #f43f5e;
@@ -271,7 +275,7 @@
     
     .modal-content {
         background-color: var(--color-background-secondary);
-        border-radius: 1.5rem;
+        border-radius: 0.75rem;
         
         width: 90%;
         
@@ -333,12 +337,15 @@
 
         transition: all 0.2s ease;
         box-sizing: border-box;
-        resize: none;
+        min-height: 9rem;
+        resize: vertical;
+        line-height: 1.6;
+        color: var(--color-text-primary);
     }
 
     .form-group textarea:focus {
         outline: none;
-        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        box-shadow: 0 0 0 2px var(--color-blue-secondary);
     }
     
     .form-actions {
@@ -372,5 +379,15 @@
     button.confirm:disabled {
         opacity: 0.6;
         cursor: not-allowed;
+    }
+
+    @media (max-width: 480px) {
+        .engagement-btn {
+            padding: 0.55rem 0.65rem;
+        }
+
+        .modal-content {
+            width: calc(100% - 2rem);
+        }
     }
 </style>

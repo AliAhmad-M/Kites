@@ -27,15 +27,17 @@
             <img use:lazyImage={{ src: "/profile.jpg" }} src="/profile.jpg" alt="pfp" class="pfp"/>
         </button>
         {/if}
-        <span class="username">{username}</span>
-        {#if author_rank && author_rank !== 'default'}
-            <Tooltip text={author_rank}>
-                <Icon mode={undefined} name={author_rank} width={20} height={20} alt={author_rank} />
-            </Tooltip>
-        {/if}
+        <div class="author-info">
+            <span class="username">{username}</span>
+            {#if author_rank && author_rank !== 'default'}
+                <Tooltip text={author_rank}>
+                    <Icon mode={undefined} name={author_rank} width={20} height={20} alt={author_rank} />
+                </Tooltip>
+            {/if}
+        </div>
         <span class="topic"><strong>{topic} | {type}</strong></span>
     </div>
-    <a href='/main/forum_posts/{topic}/{post_id}'>
+    <a href='/main/posts/{topic}/{post_id}'>
         <h3 class="title">{heading}</h3>
         {#if image}
           <img use:lazyImage={{ src: image }} src={image} alt="cover" class="cover"/>
@@ -78,8 +80,15 @@
         border-radius: 50%;
         width: 2rem;
         height: 2rem;
-        margin-right: 0.75rem;
+        margin-right: 0.4rem;
         margin-top: 0.25rem;
+    }
+
+    .author-info {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.25rem;
     }
     
     .username, .topic {

@@ -148,7 +148,7 @@ import { page } from "$app/state";
 
 <style>
     .comment {
-        padding: 1rem 0;
+        padding: 1.1rem 0;
         border-bottom: 1px solid var(--color-navigation-border);
     }
 
@@ -158,7 +158,8 @@ import { page } from "$app/state";
 
     .comment-wrapper {
         display: flex;
-        gap: 1rem;
+        gap: 0.85rem;
+        align-items: flex-start;
     }
 
     .pfp-button {
@@ -172,8 +173,8 @@ import { page } from "$app/state";
     }
 
     .comment-avatar {
-        width: 2.5rem;
-        height: 2.5rem;
+        width: 2.75rem;
+        height: 2.75rem;
         border-radius: 50%;
         object-fit: cover;
         border: 2px solid var(--color-blue-primary, #3b82f6);
@@ -181,24 +182,39 @@ import { page } from "$app/state";
 
     .comment-content {
         flex: 1;
+        min-width: 0;
     }
 
     .comment-header {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.5rem;
     }
 
     .comment-author {
-        font-weight: 500;
+        font-weight: 600;
         color: var(--color-text-primary);
+        overflow-wrap: anywhere;
     }
 
     .comment-text {
         color: var(--color-text-primary);
-        line-height: 1.5;
+        line-height: 1.65;
         margin: 0;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+        padding: 0.75rem 0.9rem;
+        background: var(--color-background-secondary);
+        border-radius: 0 0.7rem 0.7rem 0.7rem;
+    }
+
+    .comment-text :global(p:first-child) {
+        margin-top: 0;
+    }
+
+    .comment-text :global(p:last-child) {
+        margin-bottom: 0;
     }
     
     .comment-options {
@@ -211,6 +227,12 @@ import { page } from "$app/state";
         border: none;
         cursor: pointer;
         transition: opacity 0.2s ease;
+        padding: 0.35rem;
+        border-radius: 50%;
+    }
+
+    .more:hover {
+        background: var(--color-background-secondary);
     }
 
     .more:hover {
@@ -361,5 +383,16 @@ import { page } from "$app/state";
     .cancel-button:disabled, .delete-button:disabled {
         opacity: 0.6;
         cursor: not-allowed;
+    }
+
+    @media (max-width: 480px) {
+        .comment-wrapper {
+            gap: 0.65rem;
+        }
+
+        .comment-avatar {
+            width: 2.3rem;
+            height: 2.3rem;
+        }
     }
 </style>

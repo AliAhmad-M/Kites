@@ -16,11 +16,11 @@
                         class="author-pfp"
                     />
                     <div class="post-info">
-                        <a href="/main/forum_posts/{post.topic}/{post.id}" class="post-link">
+                        <a href="/main/posts/{post.topic}/{post.id}" class="post-link">
                             <h4>{post.heading}</h4>
                         </a>
                         <span class="likes">❤️ {post.likes}</span>
-                        <a href="/main/forum_posts/{post.topic}" class="topic-link">
+                        <a href="/main/posts/{post.topic}" class="topic-link">
                             <span class="topic">#{post.topic}</span>
                         </a>
                     </div>
