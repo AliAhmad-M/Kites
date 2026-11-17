@@ -55,55 +55,55 @@
 </div>
 
 <style>
-    .rules-page {
-        max-width: 800px;
-        margin: 2rem auto;
-        padding: 3rem;
-        border: 1px solid var(--color-navigation-border);
-        border-radius: 8px;
-        background-color: var(--color-background-secondary);
-        line-height: 1.6;
-    }
+.rules-page {
+	max-width: 800px;
+	margin: 2rem auto;
+	padding: 3rem;
+	border: 1px solid var(--color-navigation-border);
+	border-radius: 8px;
+	background-color: var(--color-background-secondary);
+	line-height: 1.6;
+}
 
-    h1 {
-        font-size: 2.5em;
-        margin-bottom: 1rem;
-        color: var(--color-text-primary);
-        text-align: center;
-    }
+h1 {
+	font-size: 2.5em;
+	margin-bottom: 1rem;
+	color: var(--color-text-primary);
+	text-align: center;
+}
 
-    .introduction {
-        margin-bottom: 1.5rem;
-        color: var(--color-text-secondary);
-        text-align: center;
-    }
+.introduction {
+	margin-bottom: 1.5rem;
+	color: var(--color-text-secondary);
+	text-align: center;
+}
 
-    .rule-category {
-        margin-bottom: 2rem;
-    }
+.rule-category {
+	margin-bottom: 2rem;
+}
 
-    h2 {
-        font-size: 1.8em;
-        margin-bottom: 0.8rem;
-        color: var(--color-text-primary);
-        border-bottom: 2px solid var(--color-navigation-border);
-        padding-bottom: 0.5rem;
-    }
+h2 {
+	font-size: 1.8em;
+	margin-bottom: 0.8rem;
+	color: var(--color-text-primary);
+	border-bottom: 2px solid var(--color-navigation-border);
+	padding-bottom: 0.5rem;
+}
 
-    ul {
-        list-style-type: disc;
-        padding-left: 1.5rem;
-        color: var(--color-text-primary);
-    }
+ul {
+	list-style-type: disc;
+	padding-left: 1.5rem;
+	color: var(--color-text-primary);
+}
 
-    li {
-        margin-bottom: 0.5rem;
-    }
+li {
+	margin-bottom: 0.5rem;
+}
 
-    .contact {
-        margin-top: 2rem;
-        color: var(--color-text-secondary);
-        text-align: center;
-        font-style: italic;
-    }
+.contact {
+	margin-top: 2rem;
+	color: var(--color-text-secondary);
+	text-align: center;
+	font-style: italic;
+}
 </style>

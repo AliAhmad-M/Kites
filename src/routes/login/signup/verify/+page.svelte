@@ -130,192 +130,198 @@
 </div>
 
 <style>
-    .content {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        
-        height: 97vh;
-        animation: show 0.6s ease-out;
-    }
+.content {
+	display: flex;
+	justify-content: center;
+	align-items: center;
 
-    .card {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        
-        margin: 0 auto;
-        padding: 1.25rem 2.5rem;
-        width: 22vw;
-        max-width: 420px;
-        min-width: 280px;
-        height: fit-content;
-        
-        background-color: var(--color-background-primary);
-        border-radius: 1.25rem;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-    }
+	height: 97vh;
+	animation: show 0.6s ease-out;
+}
 
-    @property --angle {
-        syntax: "<angle>";
-        initial-value: 0deg;
-        inherits: false;
-    }
+.card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
 
-    .card::after, .card::before {
-        content: '';
-        position: absolute;
-        
-        top: -0.125rem;
-        left: -0.125rem;
-        width: calc(100% + 0.25rem);
-        height: calc(100% + 0.25rem);
-        
-        background-image: conic-gradient(from var(--angle), #2bffba, #5b6ef3, #2bffba);
-        z-index: -1;
-        border-radius: 1.375rem;
-        
-        animation: spin 3s linear infinite;
-    }
+	margin: 0 auto;
+	padding: 1.25rem 2.5rem;
+	width: 22vw;
+	max-width: 420px;
+	min-width: 280px;
+	height: fit-content;
 
-    .card::before {
-        filter: blur(1.5rem);
-        opacity: 0.25;
-    }
+	background-color: var(--color-background-primary);
+	border-radius: 1.25rem;
+	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
 
-    @keyframes spin {
-        from { --angle: 0deg; }
-        to { --angle: 360deg; }
-    }
+@property --angle {
+	syntax: '<angle>';
+	initial-value: 0deg;
+	inherits: false;
+}
 
-    h1 {
-        margin-top: 0.5rem;
-        margin-bottom: 0.25rem;
-        text-align: center;
-    }
+.card::after,
+.card::before {
+	content: '';
+	position: absolute;
 
-    .subtext {
-        text-align: center;
-        color: var(--color-text-secondary);
-        
-        font-size: 0.9rem;
-        margin-bottom: 1.5rem;
-    }
+	top: -0.125rem;
+	left: -0.125rem;
+	width: calc(100% + 0.25rem);
+	height: calc(100% + 0.25rem);
 
-    .otp-container {
-        display: flex;
-        justify-content: space-between;
-        
-        gap: 0.75rem;
-        margin-bottom: 1rem;
-    }
+	background-image: conic-gradient(from var(--angle), #2bffba, #5b6ef3, #2bffba);
+	z-index: -1;
+	border-radius: 1.375rem;
 
-    .otp-container input {
-        width: 2.5rem;
-        height: 3rem;
-        
-        text-align: center;
-        font-size: 1.25rem;
-        font-weight: 600;
-        
-        padding: 0;
-        border: 1.5px solid var(--color-blue-secondary);
-        border-radius: 0.5rem;
-        
-        background-color: var(--color-background-primary);
-        color: var(--color-text-primary);
-        
-        transition: all 0.2s ease;
-    }
+	animation: spin 3s linear infinite;
+}
 
-    .otp-container input:focus {
-        outline: none;        
-        border-color: var(--color-blue-primary);
-        transform: translateY(-1px);
-    }
+.card::before {
+	filter: blur(1.5rem);
+	opacity: 0.25;
+}
 
-    .error-message {
-        color: #ff4d4f;
+@keyframes spin {
+	from {
+		--angle: 0deg;
+	}
 
-        padding: 0.75rem;
-        margin-bottom: 1rem;
+	to {
+		--angle: 360deg;
+	}
+}
 
-        border-radius: 0.5rem;
-        text-align: center;
+h1 {
+	margin-top: 0.5rem;
+	margin-bottom: 0.25rem;
+	text-align: center;
+}
 
-        font-size: 0.9rem;
-    }
+.subtext {
+	text-align: center;
+	color: var(--color-text-secondary);
 
-    .confirm {
-        margin-top: 1rem;
-        padding: 0.75rem 1rem;
-        
-        width: 100%;
-        
-        font-family: inherit;
-        font-size: 0.95rem;
-        font-weight: 600;
+	font-size: 0.9rem;
+	margin-bottom: 1.5rem;
+}
 
-        border: none;        
-        border-radius: 0.75rem;
-        
-        cursor: pointer;
+.otp-container {
+	display: flex;
+	justify-content: space-between;
 
-        background-color: var(--color-blue-primary);
-        color: var(--color-text-primary);
-        
-        transition: all 0.2s ease;
-    }
+	gap: 0.75rem;
+	margin-bottom: 1rem;
+}
 
-    .confirm:hover {
-        background-color: var(--color-blue-secondary);
-        transform: translateY(-2px);
-    }
+.otp-container input {
+	width: 2.5rem;
+	height: 3rem;
 
-    .confirm:active {
-        transform: translateY(0);
-    }
+	text-align: center;
+	font-size: 1.25rem;
+	font-weight: 600;
 
-    .confirm:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
+	padding: 0;
+	border: 1.5px solid var(--color-blue-secondary);
+	border-radius: 0.5rem;
 
-    .resend {
-        text-align: center;
-        margin-top: 1.5rem;
-        font-size: 1rem;
-        color: var(--color-text-secondary);
-    }
+	background-color: var(--color-background-primary);
+	color: var(--color-text-primary);
 
-    .other {
-        color: var(--color-blue-primary);
-        background-color: transparent;
-        
-        border: none;        
-        font-weight: bold;
+	transition: all 0.2s ease;
+}
 
-        transition: color 0.2s ease;
-    }
+.otp-container input:focus {
+	outline: none;
+	border-color: var(--color-blue-primary);
+	transform: translateY(-1px);
+}
 
-    .other:hover {
-        color: var(--color-blue-secondary);
-        text-decoration: underline;
-    }
+.error-message {
+	color: #ff4d4f;
 
-    @media (max-width: 768px) {
-        .card {
-            padding: 1.25rem 1.75rem;
-        }
-        
-        .otp-container {
-            gap: 0.5rem;
-        }
-        
-        .otp-container input {
-            width: 2rem;
-            height: 2.5rem;
-            font-size: 1rem;
-        }
-    }
+	padding: 0.75rem;
+	margin-bottom: 1rem;
+
+	border-radius: 0.5rem;
+	text-align: center;
+
+	font-size: 0.9rem;
+}
+
+.confirm {
+	margin-top: 1rem;
+	padding: 0.75rem 1rem;
+
+	width: 100%;
+
+	font-family: inherit;
+	font-size: 0.95rem;
+	font-weight: 600;
+
+	border: none;
+	border-radius: 0.75rem;
+
+	cursor: pointer;
+
+	background-color: var(--color-blue-primary);
+	color: var(--color-text-primary);
+
+	transition: all 0.2s ease;
+}
+
+.confirm:hover {
+	background-color: var(--color-blue-secondary);
+	transform: translateY(-2px);
+}
+
+.confirm:active {
+	transform: translateY(0);
+}
+
+.confirm:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.resend {
+	text-align: center;
+	margin-top: 1.5rem;
+	font-size: 1rem;
+	color: var(--color-text-secondary);
+}
+
+.other {
+	color: var(--color-blue-primary);
+	background-color: transparent;
+
+	border: none;
+	font-weight: bold;
+
+	transition: color 0.2s ease;
+}
+
+.other:hover {
+	color: var(--color-blue-secondary);
+	text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+	.card {
+		padding: 1.25rem 1.75rem;
+	}
+
+	.otp-container {
+		gap: 0.5rem;
+	}
+
+	.otp-container input {
+		width: 2rem;
+		height: 2.5rem;
+		font-size: 1rem;
+	}
+}
 </style>

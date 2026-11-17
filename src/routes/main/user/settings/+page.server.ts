@@ -3,10 +3,17 @@ import type { Actions, PageServerLoad } from './$types';
 import { prisma } from '$lib/server/prisma.server';
 import bcrypt from 'bcryptjs';
 
-export const load: PageServerLoad = ({ locals }) => {
+export const load: PageServerLoad = async ({ locals }) => {
     if (!locals.user) {
         throw redirect(303, '/login/signin');
     }
+
+    const user = await prisma.users.findUnique({
+        where: { id: locals.user.id },
+        select: { bio: true }
+    });
+
+    return { bio: user?.bio ?? '' };
 };
 
 export const actions: Actions = {
@@ -47,6 +54,24 @@ export const actions: Actions = {
         return {
             username_success: true
         };
+    },
+
+    update_bio: async ({ request, locals }) => {
+        if (!locals.user) throw redirect(303, '/login/signin');
+
+        const data = await request.formData();
+        const bio = data.get('bio')?.toString().trim() ?? '';
+
+        if (bio.length > 300) {
+            return fail(400, { bio_error: 'Bio must be 300 characters or fewer.' });
+        }
+
+        await prisma.users.update({
+            where: { id: locals.user.id },
+            data: { bio: bio || null }
+        });
+
+        return { bio_success: true, bio };
     },
 
     change_password: async ({ request, locals }) => {

@@ -29,13 +29,13 @@
         {/if}
         <div class="author-info">
             <span class="username">{username}</span>
-            {#if author_rank && author_rank !== 'default'}
+            {#if author_rank === 'Admin'}
                 <Tooltip text={author_rank}>
                     <Icon mode={undefined} name={author_rank} width={20} height={20} alt={author_rank} />
                 </Tooltip>
             {/if}
         </div>
-        <span class="topic"><strong>{topic} | {type}</strong></span>
+        <span class="topic"><strong>{topic}</strong></span>
     </div>
     <a href='/main/posts/{topic}/{post_id}'>
         <h3 class="title">{heading}</h3>
@@ -47,84 +47,75 @@
 </div>    
 
 <style>
-    a {
-        text-decoration: none;
-    }
-    
-    .post {
-        background-color: var(--color-background-secondary);
-        border-radius: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        margin: 1rem 4rem 1rem 6rem;
+a {
+	text-decoration: none;
+}
 
-        width: 45vw;
-        max-width: 900px;
-    }
-    
-    .header {
-        display: flex;
-        align-items: center;
-    }
+.post {
+	background-color: var(--color-background-secondary);
+	border-radius: 0.5rem;
+	padding: 0.75rem 1.5rem;
+	box-sizing: border-box;
+	width: min(100% - 2rem, 1000px);
+	margin: 1rem auto;
+}
 
-    .pfp-button {
-        padding: 0;
-        margin: 0;
+.header {
+	display: flex;
+	align-items: center;
+}
 
-        background: transparent;
-        border: none;
-        
-        cursor: pointer;
-    }
+.pfp-button {
+	padding: 0;
+	margin: 0;
 
-    .pfp {
-        border-radius: 50%;
-        width: 2rem;
-        height: 2rem;
-        margin-right: 0.4rem;
-        margin-top: 0.25rem;
-    }
+	background: transparent;
+	border: none;
 
-    .author-info {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 0.25rem;
-    }
-    
-    .username, .topic {
-        color: var(--color-text-secondary);
-        font-size: 0.9rem;
-    }
+	cursor: pointer;
+}
 
-    .topic {
-        margin-left: auto;
-        margin-right: 0.5rem;
-    }
-    
-    .title {
-        margin-bottom: 0.7rem;
-        margin-top: 0;
-        color: var(--color-text-primary);
-    }
+.pfp {
+	border-radius: 50%;
+	width: 2rem;
+	height: 2rem;
+	margin-right: 0.4rem;
+	margin-top: 0.25rem;
+}
 
-    .cover {
-        width: 100%;
-        border-radius: 1rem;
-        border: 1px solid var(--color-text-primary);
-    }
+.author-info {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.25rem;
+}
 
-    @media (max-width: 1200px) {
-        .post {
-            width: 64vw;
-        }
-    }
+.username,
+.topic {
+	color: var(--color-text-secondary);
+	font-size: 0.9rem;
+}
 
-    @media (max-width:  768px) {
-        .post {
-            width: 80vw;
-            margin-left: auto;
-            margin-right: auto;
-        }
-    }
-    
+.topic {
+	margin-left: auto;
+	margin-right: 0.5rem;
+}
+
+.title {
+	margin-bottom: 0.7rem;
+	margin-top: 0;
+	color: var(--color-text-primary);
+}
+
+.cover {
+	width: 100%;
+	border-radius: 1rem;
+	border: 1px solid var(--color-text-primary);
+}
+
+@media (max-width: 768px) {
+	.post {
+		padding: 0.75rem 1rem;
+	}
+}
 </style>

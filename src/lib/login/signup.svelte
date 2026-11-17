@@ -62,5 +62,5 @@
 </div>
 
 <style>
-    @import './login.css';
+@import './login.css';
 </style>

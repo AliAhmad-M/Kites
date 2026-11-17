@@ -41,40 +41,40 @@
 </div> 
 
 <style>
-    .tooltip-container {
-        position: relative;
-        display: inline-flex;
-        width: fit-content;
-    }
-    
-    .tooltip {
-        position: absolute;
-        left: 50%;
-        bottom: -0.5rem;
-        transform: translateX(-50%) translateY(100%);
+.tooltip-container {
+	position: relative;
+	display: inline-flex;
+	width: fit-content;
+}
 
-        background-color: var(--color-background-secondary, #333);
-        color: var(--color-text-primary, #fff);
-                
-        padding: 0.5rem 0.75rem;
-        
-        border-radius: 0.5rem;
-        z-index: 10;
-        
-        white-space: nowrap;
-        pointer-events: none;
+.tooltip {
+	position: absolute;
+	left: 50%;
+	bottom: -0.5rem;
+	transform: translateX(-50%) translateY(100%);
 
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
+	background-color: var(--color-background-secondary, #333);
+	color: var(--color-text-primary, #fff);
 
-    .tooltip::before {
-        content: '';
-        position: absolute;
-        top: -6px;
-        left: 50%;
-        transform: translateX(-50%);
-        border-width: 0 6px 6px 6px;
-        border-style: solid;
-        border-color: transparent transparent var(--color-background-secondary, #333) transparent;
-    }
+	padding: 0.5rem 0.75rem;
+
+	border-radius: 0.5rem;
+	z-index: 10;
+
+	white-space: nowrap;
+	pointer-events: none;
+
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.tooltip::before {
+	content: '';
+	position: absolute;
+	top: -6px;
+	left: 50%;
+	transform: translateX(-50%);
+	border-width: 0 6px 6px 6px;
+	border-style: solid;
+	border-color: transparent transparent var(--color-background-secondary, #333) transparent;
+}
 </style>

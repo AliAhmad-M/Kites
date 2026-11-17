@@ -14,6 +14,11 @@ export async function POST({ request, locals }) {
             );
         }
 
+        const topic = data.get('topic');
+        if (typeof topic !== 'string' || !['Art', 'Science', 'Philosophy', 'Nature', 'Tech', 'Gaming'].includes(topic)) {
+            return json({ error: 'Choose a valid topic' }, { status: 400 });
+        }
+
         // Get picture for post
         const image_file = data.get('image') as File;
 
@@ -33,8 +38,8 @@ export async function POST({ request, locals }) {
                     heading: data.get('heading') as string,
                     content: data.get('content') as string,
                     author_name: user.username,
-                    topic: data.get('topic') as string,
-                    type: data.get('type') as string
+                    topic,
+                    type: 'Blog'
                 }
             });
 
@@ -53,28 +58,6 @@ export async function POST({ request, locals }) {
                     }
                 });
             }
-
-            // Check if tokens record exists for the user
-            const tokens = await t.tokens.findUnique({
-                where: { user_id: user.id },
-                select: { id: true }
-            });
-
-            // Create token record if not exists
-            if (!tokens) {
-                await t.tokens.create({
-                    data: { user_id: user.id }
-                });
-            }
-
-            // Add tokens based on post type
-            const increment_value = data.get('type') === "Discussion" ? 10 : 30;
-            await t.tokens.update({
-                where: { user_id: user.id },
-                data: {
-                    tokens: { increment: increment_value }
-                }
-            });
 
             // Return ID of the created post
             return post;

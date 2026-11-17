@@ -1,6 +1,7 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
 	import { page } from "$app/state";
+    import { onDestroy } from 'svelte';
     import { fade, scale } from 'svelte/transition';
 
     const { 
@@ -12,6 +13,9 @@
     let liked = $state(user_liked);
     let is_liking = $state(false);
     let show_modal = $state(false);
+    let show_share_popup = $state(false);
+    let share_message = $state('');
+    let share_timeout: ReturnType<typeof setTimeout> | undefined;
     
     let comment_text = $state("");
     let is_submitting = $state(false);
@@ -106,19 +110,23 @@
         }
     }
 
-    function copy_to_clipboard() {
-        // Create absolute URL to the specific post
+    async function open_share_popup() {
         const path = `/main/posts/${topic}/${post_id}`;
-        const absolute_url = new URL(path, window.location.origin).toString();
-        
-        navigator.clipboard.writeText(absolute_url)
-            .then(() => {
-                alert("URL copied to clipboard!");
-            })
-            .catch(err => {
-                console.error('[KITES | ERROR]: Could not copy text: ', err);
-            });
+        const share_url = new URL(path, window.location.origin).toString();
+        try {
+            await navigator.clipboard.writeText(share_url);
+            share_message = 'URL copied to clipboard';
+        } catch (error) {
+            share_message = 'Could not copy URL';
+            console.error('[KITES | ERROR]: Could not copy text:', error);
+        }
+
+        show_share_popup = true;
+        clearTimeout(share_timeout);
+        share_timeout = setTimeout(() => show_share_popup = false, 2200);
     }
+
+    onDestroy(() => clearTimeout(share_timeout));
         
     // Close modal when clicking outside
     function handle_outside_click(event: MouseEvent) {
@@ -151,7 +159,7 @@
         </svg>
         <span>Comment</span>
     </button>
-    <button class="engagement-btn share-btn" onclick={copy_to_clipboard}>
+    <button class="engagement-btn share-btn" onclick={open_share_popup}>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="18" cy="5" r="3"></circle>
             <circle cx="6" cy="12" r="3"></circle>
@@ -162,6 +170,12 @@
         <span>Share</span>
     </button>
 </div>
+
+{#if show_share_popup}
+    <div class="share-toast" role="status" aria-live="polite">
+        {share_message}
+    </div>
+{/if}
 
 {#if show_modal}
     <div 
@@ -211,242 +225,267 @@
 {/if}
 
 <style>
-    .engagement {
-        display: flex;
-        gap: 0.75rem;
-        margin: 1rem 0;
+.engagement {
+	display: flex;
+	gap: 0.75rem;
+	margin: 1rem 0;
 
-        flex-wrap: wrap;
-    }
+	flex-wrap: wrap;
+}
 
-    .engagement-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+.engagement-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
 
-        flex: 1;
-        gap: 0.5rem;
+	flex: 1;
+	gap: 0.5rem;
 
-        padding: 0.5rem 1rem;
-        border-radius: 2rem;
-        border: none;
+	padding: 0.5rem 1rem;
+	border-radius: 2rem;
+	border: none;
 
-        background: transparent;
-        color: var(--color-text-secondary);
+	background: transparent;
+	color: var(--color-text-secondary);
 
-        font-size: 0.85rem;
-        font-weight: 500;
+	font-size: 0.85rem;
+	font-weight: 500;
 
-        cursor: pointer;
-        
-        transition: all 0.2s ease;
-    }
+	cursor: pointer;
 
-    .engagement-btn:hover {
-        background: var(--color-background-secondary);
-    }
+	transition: all 0.2s ease;
+}
 
-    .like-btn:hover, 
-    .like-btn.liked {
-        color: #f43f5e;
-    }
+.engagement-btn:hover {
+	background: var(--color-background-secondary);
+}
 
-    .like-btn.liked:hover svg {
-        fill: none;
-    }
+.engagement-btn:disabled {
+	cursor: wait;
+	opacity: 0.6;
+}
 
-    .comment-btn:hover {
-        color: #3b82f6;
-    }
+.like-btn:hover,
+.like-btn.liked {
+	color: #f43f5e;
+}
 
-    .share-btn:hover {
-        color: #10b981;
-    }
+.like-btn.liked:hover svg {
+	fill: none;
+}
 
-    .modal-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        
-        width: 100%;
-        height: 100%;
-        
-        background-color: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(5px);
-        
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        
-        z-index: 100;
-    }
-    
-    .modal-content {
-        background-color: var(--color-background-primary);
-        border: 1px solid var(--color-navigation-border);
-        border-radius: 12px;
-        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
-        
-        width: min(92vw, 540px);
-        max-height: min(90vh, 680px);
-        
-        overflow-y: auto;
-    }
-    
-    .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem;
-        padding: 1.25rem 1.5rem;
-        background-color: var(--color-background-secondary);
-        border-bottom: 1px solid var(--color-navigation-border);
-    }
-    
-    .modal-heading {
-        min-width: 0;
-    }
+.comment-btn:hover {
+	color: #3b82f6;
+}
 
-    .modal-header h2 {
-        margin: 0;
-        color: var(--color-text-primary);
-        font-size: 1.2rem;
-        line-height: 1.35;
-    }
+.share-btn:hover {
+	color: #10b981;
+}
 
-    .modal-eyebrow {
-        display: block;
-        margin-bottom: 0.25rem;
-        color: var(--color-blue-secondary);
-        font-size: 0.68rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-    }
-    
-    .close-button {
-        background: none;
-        border: none;
-        
-        cursor: pointer;
-        color: var(--color-text-secondary);
-        
-        padding: 0.25rem;
-        border-radius: 0.25rem;
-        
-        transition: color 0.2s;
-    }
-    
-    .close-button:hover {
-        color: var(--color-text-secondary);
-    }
-    
-    .modal-body {
-        padding: 1.5rem;
-    }
-    
-    .form-group {
-        margin-bottom: 1rem;
-    }
-    
-    .form-group textarea {
-        width: 100%;
-        padding: 0.9rem 1rem;
-        border-radius: 8px;
-        border: 1px solid var(--color-navigation-border);
-        
-        color: var(--color-text-primary);
-        background-color: var(--color-background-primary);
+.share-toast {
+	position: fixed;
+	bottom: 1.5rem;
+	left: 50%;
+	z-index: 110;
+	padding: 0.75rem 1rem;
+	transform: translateX(-50%);
+	border: 1px solid var(--color-navigation-border);
+	border-radius: 0.5rem;
+	background: var(--color-background-primary);
+	color: var(--color-text-primary);
+	box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+	font-size: 0.875rem;
+}
 
-        font-family: inherit;
-        font-size: 1rem;
+.modal-backdrop {
+	position: fixed;
+	top: 0;
+	left: 0;
 
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        box-sizing: border-box;
-        min-height: 9rem;
-        resize: vertical;
-        line-height: 1.6;
-        color: var(--color-text-primary);
-    }
+	width: 100%;
+	height: 100%;
 
-    .form-group textarea:focus {
-        outline: none;
-        border-color: var(--color-blue-secondary);
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-blue-secondary) 18%, transparent);
-    }
+	background-color: rgba(0, 0, 0, 0.5);
+	backdrop-filter: blur(5px);
 
-    .field-label {
-        display: block;
-        margin-bottom: 0.45rem;
-        color: var(--color-text-primary);
-        font-size: 0.82rem;
-        font-weight: 600;
-    }
-    
-    .form-actions {
-        display: flex;
-        
-        justify-content: flex-end;
-        gap: 0.75rem;
-        margin-top: 1rem;
-        padding-top: 1rem;
-        border-top: 1px solid var(--color-navigation-border);
-    }
-    
-    button.confirm,
-    button.cancel {
-        min-height: 42px;
-        padding: 0.65rem 1rem;
-        border-radius: 8px;
-        font-family: inherit;
-        font-size: 0.9rem;
-        font-weight: 600;
-        transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
-    }
+	display: flex;
+	align-items: center;
+	justify-content: center;
 
-    button.confirm {
-        background-color: var(--color-blue-primary);
-        color: white;
-        border: none;
-    }
-    
-    button.confirm:hover {
-        background-color: var(--color-blue-secondary);
-    }
-    
-    button.confirm:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
+	z-index: 100;
+}
 
-    button.cancel {
-        background: transparent;
-        color: var(--color-text-primary);
-        border: 1px solid var(--color-navigation-border);
-    }
+.modal-content {
+	background-color: var(--color-background-primary);
+	border: 1px solid var(--color-navigation-border);
+	border-radius: 12px;
+	box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
 
-    button.cancel:hover:not(:disabled) {
-        border-color: var(--color-blue-secondary);
-    }
+	width: min(92vw, 540px);
+	max-height: min(90vh, 680px);
 
-    button.cancel:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
+	overflow-y: auto;
+}
 
-    @media (max-width: 480px) {
-        .engagement-btn {
-            padding: 0.55rem 0.65rem;
-        }
+.modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 1rem;
+	padding: 1.25rem 1.5rem;
+	background-color: var(--color-background-secondary);
+	border-bottom: 1px solid var(--color-navigation-border);
+}
 
-        .modal-content {
-            width: calc(100% - 2rem);
-            max-height: calc(100dvh - 2rem);
-        }
+.modal-heading {
+	min-width: 0;
+}
 
-        .modal-header,
-        .modal-body {
-            padding: 1rem;
-        }
-    }
+.modal-header h2 {
+	margin: 0;
+	color: var(--color-text-primary);
+	font-size: 1.2rem;
+	line-height: 1.35;
+}
+
+.modal-eyebrow {
+	display: block;
+	margin-bottom: 0.25rem;
+	color: var(--color-blue-secondary);
+	font-size: 0.68rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.close-button {
+	background: none;
+	border: none;
+
+	cursor: pointer;
+	color: var(--color-text-secondary);
+
+	padding: 0.25rem;
+	border-radius: 0.25rem;
+
+	transition: color 0.2s;
+}
+
+.close-button:hover {
+	color: var(--color-red-secondary);
+}
+
+.modal-body {
+	padding: 1.5rem;
+}
+
+.form-group {
+	margin-bottom: 1rem;
+}
+
+.form-group textarea {
+	width: 100%;
+	padding: 0.9rem 1rem;
+	border-radius: 8px;
+	border: 1px solid var(--color-navigation-border);
+
+	color: var(--color-text-primary);
+	background-color: var(--color-background-primary);
+
+	font-family: inherit;
+	font-size: 1rem;
+
+	transition:
+		border-color 0.2s ease,
+		box-shadow 0.2s ease;
+	box-sizing: border-box;
+	min-height: 9rem;
+	resize: vertical;
+	line-height: 1.6;
+	color: var(--color-text-primary);
+}
+
+.form-group textarea:focus {
+	outline: none;
+	border-color: var(--color-blue-secondary);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-blue-secondary) 18%, transparent);
+}
+
+.field-label {
+	display: block;
+	margin-bottom: 0.45rem;
+	color: var(--color-text-primary);
+	font-size: 0.82rem;
+	font-weight: 600;
+}
+
+.form-actions {
+	display: flex;
+
+	justify-content: flex-end;
+	gap: 0.75rem;
+	margin-top: 1rem;
+	padding-top: 1rem;
+	border-top: 1px solid var(--color-navigation-border);
+}
+
+button.confirm,
+button.cancel {
+	min-height: 42px;
+	padding: 0.65rem 1rem;
+	border-radius: 8px;
+	font-family: inherit;
+	font-size: 0.9rem;
+	font-weight: 600;
+	transition:
+		background-color 0.2s ease,
+		border-color 0.2s ease,
+		opacity 0.2s ease;
+}
+
+button.confirm {
+	background-color: var(--color-blue-primary);
+	color: white;
+	border: none;
+}
+
+button.confirm:hover {
+	background-color: var(--color-blue-secondary);
+}
+
+button.confirm:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+button.cancel {
+	background: transparent;
+	color: var(--color-text-primary);
+	border: 1px solid var(--color-navigation-border);
+}
+
+button.cancel:hover:not(:disabled) {
+	border-color: var(--color-blue-secondary);
+}
+
+button.cancel:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+	.engagement-btn {
+		padding: 0.55rem 0.65rem;
+	}
+
+	.modal-content {
+		width: calc(100% - 2rem);
+		max-height: calc(100dvh - 2rem);
+	}
+
+	.modal-header,
+	.modal-body {
+		padding: 1rem;
+	}
+}
 </style>

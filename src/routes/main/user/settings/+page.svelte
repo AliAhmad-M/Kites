@@ -1,10 +1,60 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
-	import { page } from "$app/state";
+    import { page } from "$app/state";
+    import { optimize_profile_image } from '$lib/helper/optimize_profile_image';
     
     let { form } = $props();
     let is_updating_username = $state(false);
     let is_changing_password = $state(false);
+    let is_saving_bio = $state(false);
+    let bio_text = $state(page.data.bio ?? '');
+    let is_uploading_pfp = $state(false);
+
+    let visible_status = $state<Record<string, boolean>>({});
+    const status_timers: Record<string, ReturnType<typeof setTimeout>> = {};
+
+    function flash_status(key: string) {
+        clearTimeout(status_timers[key]);
+        visible_status[key] = true;
+        status_timers[key] = setTimeout(() => {
+            visible_status[key] = false;
+        }, 3000);
+    }
+
+    function clear_status(key: string) {
+        clearTimeout(status_timers[key]);
+        visible_status[key] = false;
+    }
+
+    $effect(() => {
+        if (form?.username_success) flash_status('username_success');
+        if (form?.bio_success) flash_status('bio_success');
+        if (form?.password_success) flash_status('password_success');
+    });
+
+    async function change_pfp(event: Event) {
+        const target = event.target as HTMLInputElement;
+        const image = target.files?.[0];
+        if (!image || is_uploading_pfp) return;
+
+        is_uploading_pfp = true;
+        try {
+            const form_data = new FormData();
+            form_data.append('image', await optimize_profile_image(image));
+            const response = await fetch('/api/user/change_pfp', { method: 'POST', body: form_data });
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                const result = await response.json();
+                alert(result.error);
+            }
+        } catch (error) {
+            console.error('[KITES | ERROR]: ', error);
+        } finally {
+            is_uploading_pfp = false;
+            target.value = '';
+        }
+    }
 </script>
 
 <svelte:head>
@@ -16,17 +66,15 @@
         <div class="settings-wrapper">
             <div class="settings-header">
                 <a class="settings-back" href="/main/user/{page.data.user?.username}">
-                    <span aria-hidden="true">←</span> Profile
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m15 18-6-6 6-6"></path>
+                    </svg>
+                    Back to profile
                 </a>
                 <div class="settings-heading-row">
                     <div>
-                        <p class="settings-kicker">ACCOUNT</p>
                         <h1>Settings</h1>
                         <p class="settings-subtitle">Manage your identity and sign-in security.</p>
-                    </div>
-                    <div class="account-chip">
-                        <span class="account-avatar" aria-hidden="true">{page.data.user?.username?.slice(0, 1).toUpperCase()}</span>
-                        <span>{page.data.user?.username}</span>
                     </div>
                 </div>
             </div>
@@ -34,15 +82,29 @@
             <div class="settings-grid">
                 <section class="settings-card" id="account">
                     <div class="card-header">
-                        <span class="section-index">01</span>
                         <div>
-                            <h2>Account name</h2>
+                            <h2>Change username and profile picture</h2>
                             <p class="card-description">Choose how people find you across Kites.</p>
                         </div>
+                    </div>
+
+                    <div class="profile-picture-editor">
+                        <label for="settings-image" class="settings-pfp-label" aria-label="Change profile picture">
+                            <img src={page.data.my_pfp || '/profile.jpg'} alt="Profile" class="settings-pfp" loading="lazy" decoding="async" fetchpriority="low" />
+                            <span class="settings-pfp-overlay" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </span>
+                            {#if is_uploading_pfp}<span class="uploading-label">Uploading...</span>{/if}
+                        </label>
+                        <span class="settings-pfp-copy"><strong>Profile picture</strong><small>Choose a new image to update your profile photo.</small></span>
+                        <input type="file" id="settings-image" accept="image/*" onchange={change_pfp} disabled={is_uploading_pfp} />
                     </div>
                     
                     <form method="POST" action="?/update_username" use:enhance={() => {
                         is_updating_username = true;
+                        clear_status('username_success');
                         return async ({ update }) => {
                             try {
                                 await update();
@@ -80,7 +142,7 @@
                                     {form.username_error}
                                 </div>
                             {/if}
-                            {#if form?.username_success}
+                            {#if visible_status.username_success}
                                 <div class="success-message" role="status">
                                     <span class="success-icon">✓</span>
                                     Username updated successfully!
@@ -94,17 +156,53 @@
                     </form>
                 </section>
 
+                <section class="settings-card bio-card" id="bio">
+                    <div class="card-header">
+                        <div>
+                            <h2>Profile bio</h2>
+                            <p class="card-description">A short introduction shown on your public profile.</p>
+                        </div>
+                    </div>
+                    <form method="POST" action="?/update_bio" use:enhance={() => {
+                        is_saving_bio = true;
+                        clear_status('bio_success');
+                        return async ({ result, update }) => {
+                            try {
+                                await update();
+                                if (result.type === 'success' && result.data?.bio !== undefined) bio_text = result.data.bio;
+                            } finally {
+                                is_saving_bio = false;
+                            }
+                        };
+                    }} class="settings-form">
+                        <div class="form-group">
+                            <label for="bio" class="form-label">About you</label>
+                            <textarea id="bio" name="bio" class="form-input bio-input" maxlength="300" rows="4" bind:value={bio_text} placeholder="Share a little about yourself."></textarea>
+                            <span class="field-hint">{bio_text.length}/300 characters</span>
+                        </div>
+                        {#if form?.bio_error}
+                            <div class="error-message" role="alert">{form.bio_error}</div>
+                        {/if}
+                        {#if visible_status.bio_success}
+                            <div class="success-message" role="status">Bio saved successfully.</div>
+                        {/if}
+                        <button type="submit" class="primary-button" disabled={is_saving_bio}>
+                            {is_saving_bio ? 'Saving...' : 'Save bio'}
+                        </button>
+                    </form>
+                </section>
+
                 <section class="settings-card" id="security">
                     <div class="card-header">
-                        <span class="section-index">02</span>
                         <div>
-                            <h2>Password &amp; security</h2>
+                            <h2>Password & security</h2>
                             <p class="card-description">Use a strong password you do not reuse elsewhere.</p>
                         </div>
                     </div>
                     
                     <form method="POST" action="?/change_password" use:enhance={() => {
                         is_changing_password = true;
+                        clear_status('password_success');
                         return async ({ update }) => {
                             try {
                                 await update();
@@ -156,7 +254,7 @@
                                 {form.password_error}
                             </div>
                         {/if}
-                        {#if form?.password_success}
+                        {#if visible_status.password_success}
                             <div class="success-message" role="status">
                                 <span class="success-icon">✓</span>
                                 Password updated successfully!
@@ -174,394 +272,286 @@
 </div>
 
 <style>
-    .settings-wrapper {
-        max-width: 1000px;
-        margin: 0 auto;
-        padding: 2rem 1rem;
-    }
+.settings-wrapper {
+	width: min(100%, 900px);
+	box-sizing: border-box;
+	margin: 0 auto;
+	padding: 2rem clamp(1rem, 4vw, 2rem) 4rem;
+}
 
-    .settings-header {
-        text-align: center;
-        margin-bottom: 3rem;
-    }
+.settings-header {
+	margin-bottom: 1.75rem;
+	padding-bottom: 1.25rem;
+	border-bottom: 1px solid var(--color-navigation-border);
+}
 
-    .settings-header h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: var(--color-text-primary);
-        margin: 0 0 0.5rem 0;
-    }
+.settings-back {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	margin-bottom: 1.25rem;
+	color: var(--color-text-secondary);
+	font-size: 0.9rem;
+	text-decoration: none;
+}
 
-    .settings-subtitle {
-        font-size: 1.1rem;
-        color: var(--color-text-primary);
-        opacity: 0.7;
-        margin: 0;
-    }
+.settings-back:hover {
+	color: var(--color-blue-secondary);
+}
 
-    .settings-grid {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        
-        gap: 2rem;
-    }
+.settings-heading-row {
+	display: flex;
+	align-items: center;
+}
 
-    .settings-card {
-        background: var(--color-background-secondary);
-        border: 2px solid var(--color-navigation-border);
-        border-radius: 0.75rem;
+.settings-header h1 {
+	margin: 0;
+	color: var(--color-text-primary);
+	font-size: 2rem;
+	line-height: 1.2;
+}
 
-        width: 60%;
-        max-width: 480px;
-        min-width: 320px;
+.settings-subtitle {
+	margin: 0.5rem 0 0;
+	color: var(--color-text-secondary);
+	font-size: 0.95rem;
+}
 
-        padding: 2rem;
-        transition: all 0.3s ease;
-    }
+.settings-grid {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 1rem;
+}
 
-    .settings-card:hover {
-        border-color: var(--color-blue-primary);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
+.settings-card,
+.settings-card:hover {
+	width: 100%;
+	max-width: none;
+	min-width: 0;
+	box-sizing: border-box;
+	padding: clamp(1.1rem, 3vw, 1.5rem);
+	border: 1px solid var(--color-navigation-border);
+	border-radius: 0.65rem;
+	background: var(--color-background-secondary);
+	box-shadow: none;
+	transform: none;
+	transition: border-color 160ms ease;
+}
 
-    .card-header {
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid var(--color-navigation-border);
-    }
+.settings-card:hover {
+	border-color: color-mix(in srgb, var(--color-blue-primary) 55%, var(--color-navigation-border));
+}
 
-    .card-header h2 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--color-text-primary);
-        margin: 0 0 0.5rem 0;
-    }
+.card-header {
+	margin: 0 0 1.25rem;
+	padding: 0 0 1rem;
+	border-bottom: 1px solid var(--color-navigation-border);
+}
 
-    .card-description {
-        font-size: 0.95rem;
-        color: var(--color-text-primary);
+.card-header h2 {
+	margin: 0;
+	color: var(--color-text-primary);
+	font-size: 1.15rem;
+	font-weight: 650;
+}
 
-        opacity: 0.7;
-        margin: 0;
-    }
+.card-description {
+	margin: 0.35rem 0 0;
+	color: var(--color-text-secondary);
+	font-size: 0.88rem;
+}
 
-    .settings-form {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
+.settings-form {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
 
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
+.form-group {
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+}
 
-    .form-label {
-        font-size: 0.9rem;
-        font-weight: 500;
-        
-        color: var(--color-text-primary);
-        margin-bottom: 0.25rem;
-    }
+.form-label {
+	color: var(--color-text-secondary);
+	font-size: 0.83rem;
+	font-weight: 600;
+}
 
-    .form-input {
-        padding: 0.875rem 1rem;
-        border: 2px solid var(--color-navigation-border);
-        background: var(--color-background-primary);
-        color: var(--color-text-primary);
-        
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: all 0.2s ease;
-    }
+.form-input {
+	width: 100%;
+	min-width: 0;
+	box-sizing: border-box;
+	padding: 0.75rem 0.85rem;
+	border: 1px solid var(--color-navigation-border);
+	border-radius: 0.4rem;
+	background: var(--color-background-primary);
+	color: var(--color-text-primary);
+	font: inherit;
+	font-size: 0.93rem;
+}
 
-    .form-input:focus {
-        outline: none;
-        border-color: var(--color-blue-primary);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
+.form-input:focus {
+	outline: none;
+	border-color: var(--color-blue-primary);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-blue-primary) 18%, transparent);
+}
 
-    .form-input.disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        background: var(--color-navigation-border);
-    }
+.form-input.disabled {
+	opacity: 0.65;
+	cursor: not-allowed;
+}
 
-    .form-input::placeholder {
-        color: var(--color-text-primary);
-        opacity: 0.5;
-    }
+.form-input::placeholder {
+	color: var(--color-text-secondary);
+	opacity: 0.8;
+}
 
-    .primary-button {
-        padding: 0.875rem 1.5rem;
-        margin-top: 0.5rem;
-        
-        background: var(--color-blue-primary);
-        color: white;
-        border: none;
-        border-radius: 0.5rem;
+.bio-input {
+	min-height: 7rem;
+	resize: vertical;
+	line-height: 1.5;
+}
 
-        font-size: 1rem;
-        font-weight: 500;
-        cursor: pointer;
-        
-        transition: all 0.2s ease;
-    }
+.field-hint {
+	align-self: flex-end;
+	color: var(--color-text-secondary);
+	font-size: 0.75rem;
+}
 
-    .primary-button:hover {
-        background: var(--color-blue-secondary);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    }
+.primary-button {
+	align-self: flex-start;
+	min-height: 2.55rem;
+	padding: 0.65rem 1rem;
+	border: 0;
+	border-radius: 0.4rem;
+	background: var(--color-blue-primary);
+	color: #fff;
+	font: inherit;
+	font-size: 0.9rem;
+	font-weight: 600;
+	cursor: pointer;
+}
 
-    .primary-button:active {
-        transform: translateY(0);
-    }
+.primary-button:hover:not(:disabled) {
+	background: var(--color-blue-secondary);
+}
 
-    .primary-button:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        
-        transform: none;
-        box-shadow: none;
-    }
+.primary-button:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
 
-    .error-message {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        
-        padding: 0.75rem 1rem;
-        border-radius: 6px;
-        
-        background: rgba(239, 68, 68, 0.1);
-        border: 1px solid var(--color-red-primary);
-        
-        color: var(--color-red-primary);
-        font-size: 0.9rem;
-    }
+.error-message,
+.success-message {
+	padding: 0.7rem 0.85rem;
+	border-radius: 0.4rem;
+	font-size: 0.88rem;
+}
 
-    .success-message {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        
-        padding: 0.75rem 1rem;
-        background: rgba(34, 197, 94, 0.1);
-        
-        border: 1px solid #22c55e;
-        border-radius: 6px;
-        color: #16a34a;
-        font-size: 0.9rem;
-    }
+.error-message {
+	border: 1px solid var(--color-red-primary);
+	background: color-mix(in srgb, var(--color-red-primary) 10%, transparent);
+	color: var(--color-red-primary);
+}
 
-    .error-icon,
-    .success-icon {
-        font-size: 1rem;
-        font-weight: bold;
-    }
+.success-message {
+	border: 1px solid #22c55e;
+	background: rgb(34 197 94 / 10%);
+	color: #16a34a;
+}
 
-    .settings-wrapper {
-        width: min(100%, 1040px);
-        box-sizing: border-box;
-        padding: 2.5rem 1.5rem 4rem;
-    }
+.error-icon,
+.success-icon {
+	font-weight: 700;
+}
 
-    .settings-header {
-        text-align: left;
-        margin-bottom: 2.5rem;
-        padding-bottom: 1.75rem;
-        border-bottom: 1px solid var(--color-navigation-border);
-    }
+.profile-picture-editor {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	margin-bottom: 1.25rem;
+}
 
-    .settings-back {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 1.75rem;
-        color: var(--color-text-secondary);
-        font-size: 0.88rem;
-        text-decoration: none;
-    }
+.settings-pfp-label {
+	position: relative;
+	display: block;
+	width: 4.5rem;
+	height: 4.5rem;
+	flex: none;
+	overflow: hidden;
+	border-radius: 50%;
+	cursor: pointer;
+}
 
-    .settings-back:hover {
-        color: var(--color-blue-secondary);
-    }
+.settings-pfp {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
 
-    .settings-heading-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1.5rem;
-    }
+.settings-pfp-overlay {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-items: center;
+	background: rgb(0 0 0 / 48%);
+	color: #fff;
+	opacity: 0;
+	transition: opacity 150ms ease;
+}
 
-    .settings-kicker {
-        margin: 0 0 0.3rem;
-        color: var(--color-blue-secondary);
-        font-size: 0.72rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-    }
+.settings-pfp-label:hover .settings-pfp-overlay,
+.settings-pfp-label:focus-within .settings-pfp-overlay {
+	opacity: 1;
+}
 
-    .settings-header h1 {
-        margin: 0;
-        font-size: 2rem;
-        line-height: 1.2;
-    }
+.settings-pfp-copy {
+	display: grid;
+	gap: 0.25rem;
+	color: var(--color-text-primary);
+	font-size: 0.9rem;
+}
 
-    .settings-subtitle {
-        margin: 0.5rem 0 0;
-        color: var(--color-text-secondary);
-        font-size: 0.95rem;
-    }
+.settings-pfp-copy small {
+	color: var(--color-text-secondary);
+	font-size: 0.78rem;
+}
 
-    .account-chip {
-        display: flex;
-        align-items: center;
-        gap: 0.65rem;
-        max-width: 45%;
-        padding: 0.5rem 0.75rem 0.5rem 0.5rem;
-        border: 1px solid var(--color-navigation-border);
-        border-radius: 2rem;
-        color: var(--color-text-primary);
-        font-size: 0.85rem;
-        overflow-wrap: anywhere;
-    }
+.uploading-label {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	padding: 0.25rem;
+	background: rgb(0 0 0 / 65%);
+	color: #fff;
+	font-size: 0.65rem;
+	text-align: center;
+}
 
-    .account-avatar {
-        display: grid;
-        flex: none;
-        place-items: center;
-        width: 2rem;
-        height: 2rem;
-        border-radius: 50%;
-        background: var(--color-blue-primary);
-        color: #fff;
-        font-weight: 600;
-        text-transform: uppercase;
-    }
+input[type='file'] {
+	display: none;
+}
 
-    .settings-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        align-items: start;
-        gap: 2.5rem;
-    }
+@media (max-width: 600px) {
+	.settings-wrapper {
+		padding-top: 1.25rem;
+	}
 
-    .settings-card,
-    .settings-card:hover {
-        width: auto;
-        min-width: 0;
-        max-width: none;
-        padding: 1.4rem;
-        border: 1px solid var(--color-navigation-border);
-        border-top: 2px solid var(--color-blue-primary);
-        border-radius: 0.45rem;
-        background: var(--color-background-secondary);
-        box-shadow: none;
-        transform: none;
-    }
+	.settings-header h1 {
+		font-size: 1.7rem;
+	}
 
-    .card-header {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.9rem;
-        margin: 0 0 1.4rem;
-        padding: 0 0 1rem;
-        border-bottom: 1px solid var(--color-navigation-border);
-    }
+	.primary-button {
+		width: 100%;
+	}
 
-    .section-index {
-        color: var(--color-blue-secondary);
-        font-size: 0.75rem;
-        font-weight: 700;
-    }
-
-    .card-header h2 {
-        margin: 0;
-        font-size: 1.15rem;
-    }
-
-    .card-description {
-        margin-top: 0.35rem;
-        color: var(--color-text-secondary);
-        font-size: 0.86rem;
-        opacity: 1;
-    }
-
-    .settings-form {
-        gap: 1.15rem;
-    }
-
-    .form-label {
-        color: var(--color-text-secondary);
-        font-size: 0.82rem;
-    }
-
-    .form-input {
-        min-width: 0;
-        box-sizing: border-box;
-        padding: 0.75rem 0.85rem;
-        border: 1px solid var(--color-navigation-border);
-        border-radius: 0.35rem;
-        font-family: inherit;
-        font-size: 0.92rem;
-    }
-
-    .form-input:focus {
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-blue-primary) 18%, transparent);
-    }
-
-    .primary-button {
-        align-self: flex-start;
-        min-height: 2.7rem;
-        padding: 0.65rem 1rem;
-        margin-top: 0.25rem;
-        border-radius: 0.35rem;
-        font-size: 0.9rem;
-    }
-
-    .primary-button:hover {
-        transform: none;
-        box-shadow: none;
-    }
-
-    @media (max-width: 768px) {
-        .settings-grid {
-            grid-template-columns: 1fr;
-            gap: 2rem;
-        }
-
-        .settings-card {
-            padding: 1.1rem;
-        }
-
-        .settings-header h1 {
-            font-size: 1.8rem;
-        }
-
-        .settings-wrapper {
-            padding: 1.5rem 1rem 3rem;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .settings-heading-row {
-            align-items: flex-start;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .account-chip {
-            max-width: 100%;
-        }
-
-        .form-input,
-        .primary-button {
-            padding: 0.7rem 0.75rem;
-        }
-    }
+	.profile-picture-editor {
+		align-items: flex-start;
+	}
+}
 </style>

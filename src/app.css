@@ -3,101 +3,99 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --color-background-primary: #0a0a0f;
-    --color-background-secondary: #14141a;
-    
-    --color-blue-primary: #2563eb;
-    --color-blue-secondary: #3b82f6;
-    
-    --color-red-primary: #dc2626;
-    --color-red-secondary: #ef4444;
+	--color-background-primary: #0a0a0f;
+	--color-background-secondary: #14141a;
 
-    --color-text-primary: #f8fafc;
-    --color-text-secondary: #94a3b8;
-    --color-text-button: #ffffff;
+	--color-blue-primary: #2563eb;
+	--color-blue-secondary: #3b82f6;
 
-    --color-navigation-border: rgba(148, 163, 184, 0.2);
+	--color-red-primary: #dc2626;
+	--color-red-secondary: #ef4444;
+
+	--color-text-primary: #f8fafc;
+	--color-text-secondary: #94a3b8;
+	--color-text-button: #ffffff;
+
+	--color-navigation-border: rgba(148, 163, 184, 0.2);
 }
 
 .light {
-    --color-background-primary: #fefefe;
-    --color-background-secondary: #f1f5f9;
-    
-    --color-blue-primary: #2563eb;
-    --color-blue-secondary: #3b82f6;
+	--color-background-primary: #fefefe;
+	--color-background-secondary: #f1f5f9;
 
-    --color-red-primary: #dc2626;
-    --color-red-secondary: #ef4444;
+	--color-blue-primary: #2563eb;
+	--color-blue-secondary: #3b82f6;
 
-    --color-text-primary: #0f172a;
-    --color-text-secondary: #64748b;
-    --color-text-button: #ffffff;
+	--color-red-primary: #dc2626;
+	--color-red-secondary: #ef4444;
 
-    --color-navigation-border: rgba(100, 116, 139, 0.2);
+	--color-text-primary: #0f172a;
+	--color-text-secondary: #64748b;
+	--color-text-button: #ffffff;
+
+	--color-navigation-border: rgba(100, 116, 139, 0.2);
 }
 
 body {
-    font-family: "Poppins", sans-serif;
-    background-color: var(--color-background-primary);
-    color: var(--color-text-primary);
+	font-family: 'Poppins', sans-serif;
+	background-color: var(--color-background-primary);
+	color: var(--color-text-primary);
 }
 
 button {
-    font-family: inherit;
-    cursor: pointer;
+	font-family: inherit;
+	cursor: pointer;
 }
 
 .lazy-image {
-    background-color: var(--color-background-secondary);
-    background-image: linear-gradient(
-        100deg,
-        var(--color-background-secondary) 30%,
-        color-mix(in srgb, var(--color-background-secondary) 65%, var(--color-text-secondary)) 50%,
-        var(--color-background-secondary) 70%
-    );
-    background-size: 200% 100%;
-    animation: lazy-image-shimmer 1.4s ease-in-out infinite;
+	background-color: var(--color-background-secondary);
+	background-image: linear-gradient(
+		100deg,
+		var(--color-background-secondary) 30%,
+		color-mix(in srgb, var(--color-background-secondary) 65%, var(--color-text-secondary)) 50%,
+		var(--color-background-secondary) 70%
+	);
+	background-size: 200% 100%;
+	animation: lazy-image-shimmer 1.4s ease-in-out infinite;
 }
 
 .lazy-image.lazy-image-loaded {
-    animation: none;
-    background-image: none;
+	animation: none;
+	background-image: none;
 }
 
 @keyframes lazy-image-shimmer {
-    to {
-        background-position: -200% 0;
-    }
+	to {
+		background-position: -200% 0;
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .lazy-image {
-        animation: none;
-    }
+	.lazy-image {
+		animation: none;
+	}
 }
 
 @media screen and (max-width: 1024px) {
-    html {
-        font-size: 15px !important;
-    }
+	html {
+		font-size: 15px !important;
+	}
 }
 
-@media screen and (max-width:  768px) {
-    html {
-        font-size: 14px !important;
-    }
+@media screen and (max-width: 768px) {
+	html {
+		font-size: 14px !important;
+	}
 }
 
 @media screen and (max-width: 480px) {
-    html {
-        font-size: 13px !important;
-    }
+	html {
+		font-size: 13px !important;
+	}
 }
 
 @media screen and (max-width: 360px) {
-    html {
-        font-size: 12px !important;
-    }
+	html {
+		font-size: 12px !important;
+	}
 }
-
-

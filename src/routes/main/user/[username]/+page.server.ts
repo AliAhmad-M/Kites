@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from '$lib/server/prisma.server';
 import { error } from '@sveltejs/kit';
-import { get_dashboard_data } from '$lib/server/dashboard.server';
 
 export async function load({ params, locals }) {
     // Access username from route parameters
@@ -23,7 +22,9 @@ export async function load({ params, locals }) {
             const user = await prisma.users.findUnique({
                 where: { username: username },
                 select: {
+                    id: true,
                     username: true,
+                    bio: true,
                     rank: true,
                     email: true,
                     image: {
@@ -45,7 +46,7 @@ export async function load({ params, locals }) {
                 : null;
 
             const post_filter = { author_name: user.username };
-            const [posts, post_count, likes_total] = await Promise.all([
+            const [posts, comments, liked_posts, post_count, comment_count, liked_count] = await Promise.all([
                 prisma.forumPosts.findMany({
                     where: post_filter,
                     orderBy: { id: 'desc' },
@@ -56,35 +57,88 @@ export async function load({ params, locals }) {
                         topic: true,
                         type: true,
                         likes: true,
-                        image: { select: { id: true } }
+                        image: { select: { id: true } },
+                        user_likes: locals.user ? {
+                            where: { user_id: locals.user.id },
+                            select: { id: true }
+                        } : false
+                    }
+                }),
+                prisma.forumComments.findMany({
+                    where: { author_name: user.username },
+                    orderBy: { id: 'desc' },
+                    take: 8,
+                    select: {
+                        id: true,
+                        comment: true,
+                        post: {
+                            select: {
+                                id: true,
+                                heading: true,
+                                topic: true,
+                                image: { select: { id: true } }
+                            }
+                        }
+                    }
+                }),
+                prisma.forumLikes.findMany({
+                    where: { user_id: user.id },
+                    orderBy: { id: 'desc' },
+                    take: 8,
+                    select: {
+                        post: {
+                            select: {
+                                id: true,
+                                heading: true,
+                                topic: true,
+                                likes: true,
+                                image: { select: { id: true } },
+                                user_likes: locals.user ? {
+                                    where: { user_id: locals.user.id },
+                                    select: { id: true }
+                                } : false
+                            }
+                        }
                     }
                 }),
                 prisma.forumPosts.count({ where: post_filter }),
-                prisma.forumPosts.aggregate({
-                    where: post_filter,
-                    _sum: { likes: true }
-                })
+                prisma.forumComments.count({ where: { author_name: user.username } }),
+                prisma.forumLikes.count({ where: { user_id: user.id } })
             ]);
 
-            const profile_posts = posts.map(({ image, ...post }) => ({
+            const profile_posts = posts.map(({ image, user_likes, ...post }) => ({
                 ...post,
-                image_url: image ? `/api/forum/image/${post.id}` : null
+                image_url: image ? `/api/forum/image/${post.id}` : null,
+                user_liked: user_likes ? user_likes.length > 0 : false
             }));
+            const profile_comments = comments.map(({ post, ...comment }) => ({
+                ...comment,
+                post: {
+                    ...post,
+                    image_url: post.image ? `/api/forum/image/${post.id}` : null
+                }
+            }));
+            const profile_likes = liked_posts.map(({ post }) => {
+                const { image, user_likes, ...liked_post } = post;
+                return {
+                    ...liked_post,
+                    image_url: image ? `/api/forum/image/${liked_post.id}` : null,
+                    user_liked: user_likes ? user_likes.length > 0 : false
+                };
+            });
             
-            // Get admin dashboard stats
-            const dashboard_data = is_owner && user.rank === "Admin"
-                ? await get_dashboard_data(user.rank)
-                : null;
-    
             // Return profile page data
             return {
                 email: email,
                 rank: rank,
+                bio: user.bio,
                 image: image_url,
                 posts: profile_posts,
+                comments: profile_comments,
+                liked_posts: profile_likes,
                 post_count,
-                likes_received: likes_total._sum.likes ?? 0,
-                admin_stats: dashboard_data
+                comment_count,
+                liked_count
             };
         } catch (e) {
             console.error('[KITES | ERROR]: ', e);

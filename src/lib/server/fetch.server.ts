@@ -2,45 +2,21 @@
 /* eslint-disable prefer-const */
 import { prisma } from "$lib/server/prisma.server";
 
-// Fetching featured posts
-export async function fetch_featured_posts() {
-    const posts = await prisma.forumPosts.findMany({
-        take: 5,
-        orderBy: { likes: 'desc' },
-        include: {
-            // Get author profile picture
-            author: {
-                select: {
-                    rank: true,
-                    image: {
-                        select: { id: true }
-                    }
-                }
-            }
-        }
-    });
-
-    // Attatch profile picture URL to the post
-    const processed_posts = await Promise.all(
-        posts.map(async (post) => {
-            return {
-                ...post,
-                author_pfp: post.author.image
-                    ? `/api/user/image/${encodeURIComponent(post.author_name)}`
-                    : null
-            };
-        })
-    );
-
-    return processed_posts;
-}
-
-// Fetch all posts
-export async function fetch_posts(locals: any, topic: string | undefined, page: number = 1) {
+// Fetch posts with an optional title search.
+export async function fetch_posts(
+    locals: any,
+    topic: string | undefined,
+    page: number = 1,
+    filters: { search?: string } = {}
+) {
     const user = locals.user;
 
+    const where: any = {};
+    if (topic) where.topic = topic;
+    if (filters.search?.trim()) where.heading = { contains: filters.search.trim() };
+
     let posts = await prisma.forumPosts.findMany({
-        where: topic ? { topic: topic } : {},
+        where,
         orderBy: { likes: 'desc' },
         // Take 10 posts per page
         skip: (page - 1) * 10,

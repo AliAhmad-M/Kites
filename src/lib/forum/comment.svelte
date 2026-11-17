@@ -90,7 +90,7 @@ import { page } from "$app/state";
         <div class="comment-content">
             <div class="comment-header">
                 <span class="comment-author">{comment_data.author_name}</span>
-                {#if comment_data.author_rank && comment_data.author_rank !== 'default'}
+                {#if comment_data.author_rank === 'Admin'}
                     <Tooltip text={comment_data.author_rank}>
                         <Icon mode={undefined} name={comment_data.author_rank} width={20} height={20} alt={comment_data.author_rank} />
                     </Tooltip>
@@ -147,252 +147,249 @@ import { page } from "$app/state";
 {/if}
 
 <style>
-    .comment {
-        padding: 1.1rem 0;
-        border-bottom: 1px solid var(--color-navigation-border);
-    }
+.comment {
+	padding: 1rem 0;
+}
 
-    .comment:last-child {
-        border-bottom: none;
-    }
+.comment-wrapper {
+	display: flex;
+	gap: 0.75rem;
+	align-items: flex-start;
+}
 
-    .comment-wrapper {
-        display: flex;
-        gap: 0.85rem;
-        align-items: flex-start;
-    }
+.pfp-button {
+	padding: 0;
+	margin: 0;
 
-    .pfp-button {
-        padding: 0;
-        margin: 0;
+	background: transparent;
+	border: none;
 
-        background: transparent;
-        border: none;
-        
-        cursor: pointer;
-    }
+	cursor: pointer;
+}
 
-    .comment-avatar {
-        width: 2.75rem;
-        height: 2.75rem;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid var(--color-blue-primary, #3b82f6);
-    }
+.comment-avatar {
+	width: 2.75rem;
+	height: 2.75rem;
+	border-radius: 50%;
+	object-fit: cover;
+}
 
-    .comment-content {
-        flex: 1;
-        min-width: 0;
-    }
+.comment-content {
+	flex: 1;
+	min-width: 0;
+}
 
-    .comment-header {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.5rem;
-    }
+.comment-header {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	margin-bottom: 0.3rem;
+}
 
-    .comment-author {
-        font-weight: 600;
-        color: var(--color-text-primary);
-        overflow-wrap: anywhere;
-    }
+.comment-author {
+	font-size: 0.88rem;
+	font-weight: 500;
+	color: var(--color-text-secondary);
+	overflow-wrap: anywhere;
+}
 
-    .comment-text {
-        color: var(--color-text-primary);
-        line-height: 1.65;
-        margin: 0;
-        overflow-wrap: anywhere;
-        white-space: pre-wrap;
-        padding: 0.75rem 0.9rem;
-        background: var(--color-background-secondary);
-        border-radius: 0 0.7rem 0.7rem 0.7rem;
-    }
+.comment-text {
+	color: var(--color-text-primary);
+	line-height: 1.5;
+	margin: 0;
+	overflow-wrap: anywhere;
+	white-space: pre-wrap;
+	padding: 0;
+	background: transparent;
+	font-size: 0.9rem;
+}
 
-    .comment-text :global(p:first-child) {
-        margin-top: 0;
-    }
+.comment-text :global(p:first-child) {
+	margin-top: 0;
+}
 
-    .comment-text :global(p:last-child) {
-        margin-bottom: 0;
-    }
-    
-    .comment-options {
-        position: relative;
-        margin-left: auto;
-    }
+.comment-text :global(p:last-child) {
+	margin-bottom: 0;
+}
 
-    .more {
-        background-color: transparent;
-        border: none;
-        cursor: pointer;
-        transition: opacity 0.2s ease;
-        padding: 0.35rem;
-        border-radius: 50%;
-    }
+.comment-options {
+	position: relative;
+	margin-left: auto;
+}
 
-    .more:hover {
-        background: var(--color-background-secondary);
-    }
+.more {
+	background-color: transparent;
+	border: none;
+	cursor: pointer;
+	transition: opacity 0.2s ease;
+	padding: 0.35rem;
+	border-radius: 50%;
+}
 
-    .more:hover {
-        opacity: 0.7;
-    }
+.more:hover {
+	background: var(--color-background-secondary);
+}
 
-    .dropdown-menu {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        z-index: 10;
-        
-        min-width: 120px;
-        
-        margin-top: 0.25rem;
-        padding: 0.25rem;
-        
-        background-color: var(--color-background-primary);
-        
-        border: 1px solid var(--color-navigation-border);
-        border-radius: 0.5rem;
-        
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
+.more:hover {
+	opacity: 0.7;
+}
 
-    .dropdown-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        
-        width: 100%;
-        
-        padding: 0.5rem;
-        
-        font-size: 0.85rem;
-        font-weight: 500;
-        
-        background-color: transparent;
-        border: none;
-        border-radius: 0.25rem;
-        
-        cursor: pointer;
-        
-        transition: background-color 0.2s ease;
-    }
+.dropdown-menu {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	z-index: 10;
 
-    .delete-comment {
-        color: var(--color-red-secondary);
-    }
+	min-width: 120px;
 
-    .delete-comment:hover {
-        background-color: rgba(229, 57, 53, 0.1);
-    }
+	margin-top: 0.25rem;
+	padding: 0.25rem;
 
-    .delete-comment svg {
-        color: var(--color-red-secondary);
-    }
-    
-    .confirm-dialog {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 100;
-        
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        
-        background-color: rgba(0, 0, 0, 0.5);
-    }
+	background-color: var(--color-background-primary);
 
-    .confirm-content {
-        width: 90%;
-        max-width: 400px;
-        
-        padding: 1.5rem;
-        
-        background-color: var(--color-background-primary);
-        
-        border-radius: 1rem;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    }
+	border: 1px solid var(--color-navigation-border);
+	border-radius: 0.5rem;
 
-    .confirm-content h3 {
-        margin-top: 0;
-        margin-bottom: 0.75rem;
-        
-        font-size: 1.25rem;
-        font-weight: 600;
-        
-        color: var(--color-red-secondary);
-    }
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
 
-    .confirm-content p {
-        margin-bottom: 1.5rem;
-        
-        font-size: 0.95rem;
-        
-        color: var(--color-text-secondary);
-    }
+.dropdown-item {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
 
-    .confirm-buttons {
-        display: flex;
-        justify-content: flex-end;
-        gap: 0.75rem;
-    }
+	width: 100%;
 
-    .cancel-button, .delete-button {
-        padding: 0.5rem 1rem;
-        
-        font-size: 0.9rem;
-        font-weight: 500;
-        
-        border-radius: 0.5rem;
-        
-        cursor: pointer;
-        
-        transition: all 0.2s ease;
-    }
+	padding: 0.5rem;
 
-    .cancel-button {
-        background-color: transparent;
-        color: var(--color-text-primary);
-        
-        border: 1px solid var(--color-navigation-border);
-    }
-    
-    .cancel-button:hover {
-        border-color: var(--color-blue-primary);
-        color: var(--color-blue-primary);
-    }
+	font-size: 0.85rem;
+	font-weight: 500;
 
-    .delete-button {
-        background-color: var(--color-red-secondary);
-        color: white;
-        
-        border: none;
-    }
-    
-    .delete-button:hover {
-        background-color: var(--color-red-primary);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(229, 57, 53, 0.4);
-    }
+	background-color: transparent;
+	border: none;
+	border-radius: 0.25rem;
 
-    .cancel-button:disabled, .delete-button:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
+	cursor: pointer;
 
-    @media (max-width: 480px) {
-        .comment-wrapper {
-            gap: 0.65rem;
-        }
+	transition: background-color 0.2s ease;
+}
 
-        .comment-avatar {
-            width: 2.3rem;
-            height: 2.3rem;
-        }
-    }
+.delete-comment {
+	color: var(--color-red-secondary);
+}
+
+.delete-comment:hover {
+	background-color: rgba(229, 57, 53, 0.1);
+}
+
+.delete-comment svg {
+	color: var(--color-red-secondary);
+}
+
+.confirm-dialog {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 100;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+.confirm-content {
+	width: 90%;
+	max-width: 400px;
+
+	padding: 1.5rem;
+
+	background-color: var(--color-background-primary);
+
+	border-radius: 1rem;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.confirm-content h3 {
+	margin-top: 0;
+	margin-bottom: 0.75rem;
+
+	font-size: 1.25rem;
+	font-weight: 600;
+
+	color: var(--color-red-secondary);
+}
+
+.confirm-content p {
+	margin-bottom: 1.5rem;
+
+	font-size: 0.95rem;
+
+	color: var(--color-text-secondary);
+}
+
+.confirm-buttons {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.75rem;
+}
+
+.cancel-button,
+.delete-button {
+	padding: 0.5rem 1rem;
+
+	font-size: 0.9rem;
+	font-weight: 500;
+
+	border-radius: 0.5rem;
+
+	cursor: pointer;
+
+	transition: all 0.2s ease;
+}
+
+.cancel-button {
+	background-color: transparent;
+	color: var(--color-text-primary);
+
+	border: 1px solid var(--color-navigation-border);
+}
+
+.cancel-button:hover {
+	border-color: var(--color-blue-primary);
+	color: var(--color-blue-primary);
+}
+
+.delete-button {
+	background-color: var(--color-red-secondary);
+	color: white;
+
+	border: none;
+}
+
+.delete-button:hover {
+	background-color: var(--color-red-primary);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(229, 57, 53, 0.4);
+}
+
+.cancel-button:disabled,
+.delete-button:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+	.comment-wrapper {
+		gap: 0.65rem;
+	}
+
+	.comment-avatar {
+		width: 2.3rem;
+		height: 2.3rem;
+	}
+}
 </style>
